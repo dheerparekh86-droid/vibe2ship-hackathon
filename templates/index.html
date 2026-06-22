@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeadlineAI — Last-Minute Life Saver</title>
+    <title>DeadlineAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -12,572 +13,972 @@
             padding: 0;
         }
         
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #0f0f13;
-            color: #e8e8f0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+         :root {
+            --bg: #f7f4ee;
+            --ink: #151915;
+            --muted: #5d665e;
+            --faint: #899088;
+            --line: rgba(35, 47, 39, 0.14);
+            --line-strong: rgba(35, 47, 39, 0.24);
+            --card: rgba(255, 255, 255, 0.78);
+            --sage: #32775a;
+            --sage-dark: #1f5a42;
+            --aqua: #4c99a2;
+            --coral: #db7050;
+            --amber: #b98428;
+            --blue: #456bb6;
+            --lav: #7b68a8;
+            --shadow: 0 20px 56px rgba(37, 52, 43, 0.14);
+            --soft-shadow: 0 10px 28px rgba(37, 52, 43, 0.10);
         }
-        /* ── Header ── */
+        
+        body {
+            min-height: 100vh;
+            font-family: Inter, system-ui, sans-serif;
+            color: var(--ink);
+            background: radial-gradient(circle at 12% 8%, rgba(76, 153, 162, 0.18), transparent 28rem), radial-gradient(circle at 90% 5%, rgba(219, 112, 80, 0.14), transparent 24rem), linear-gradient(135deg, #fbf8f1, #edf6f2 52%, #f8eee7);
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(rgba(35, 47, 39, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(35, 47, 39, 0.025) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent 72%);
+        }
         
         header {
-            padding: 20px 32px;
-            border-bottom: 1px solid #1e1e2e;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            height: 70px;
+            padding: 0 28px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+            background: rgba(250, 248, 242, 0.78);
+            backdrop-filter: blur(18px);
         }
         
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
+        .brand,
+        .userbar,
+        .pill,
+        button,
+        .sample,
+        .mood {
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .brand {
+            gap: 11px;
+            color: var(--ink);
+            text-decoration: none;
+            font: 800 18px Sora, sans-serif;
+        }
+        
+        .mark {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
             color: #fff;
+            background: linear-gradient(135deg, var(--sage-dark), var(--aqua));
+            box-shadow: 0 14px 26px rgba(31, 90, 66, 0.22);
         }
         
-        .logo span {
-            color: #f97316;
+        svg {
+            flex: 0 0 auto;
         }
         
-        .badge {
-            font-size: 0.7rem;
-            background: #1e1e2e;
-            color: #888;
-            padding: 3px 8px;
-            border-radius: 20px;
-            border: 1px solid #2e2e3e;
+        .mark svg,
+        button svg,
+        .icon svg {
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
-        /* ── Main layout ── */
+        
+        .mark svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.4;
+        }
+        
+        .userbar {
+            gap: 10px;
+        }
+        
+        .pill {
+            min-height: 34px;
+            gap: 8px;
+            padding: 0 13px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.62);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+        }
+        
+        .logout {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 800;
+        }
         
         main {
-            flex: 1;
-            max-width: 780px;
-            width: 100%;
+            position: relative;
+            z-index: 1;
+            width: min(100%, 1180px);
             margin: 0 auto;
-            padding: 40px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 28px;
-        }
-        /* ── Hero ── */
-        
-        .hero h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 8px;
+            padding: 42px 22px 64px;
         }
         
-        .hero h1 span {
-            color: #f97316;
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 330px;
+            gap: 22px;
+            align-items: end;
+            margin-bottom: 22px;
+        }
+        
+        h1 {
+            max-width: 760px;
+            font: 800 clamp(40px, 7vw, 76px)/0.98 Sora, sans-serif;
+            letter-spacing: -0.045em;
+        }
+        
+        h1 span {
+            color: transparent;
+            background: linear-gradient(110deg, var(--sage-dark), var(--aqua), var(--coral));
+            -webkit-background-clip: text;
+            background-clip: text;
         }
         
         .hero p {
-            color: #888;
-            font-size: 1rem;
-            line-height: 1.6;
+            max-width: 620px;
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.75;
         }
-        /* ── Mode pills ── */
         
-        .modes {
-            display: flex;
+        .pulse-card,
+        .composer,
+        .side-card,
+        .output {
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: var(--card);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+        
+        .pulse-card {
+            padding: 20px;
+        }
+        
+        .pulse-card strong {
+            display: block;
+            margin-bottom: 10px;
+            font: 800 14px Sora, sans-serif;
+        }
+        
+        .status-line {
+            display: grid;
             gap: 10px;
-            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
         }
         
-        .mode-pill {
-            font-size: 0.75rem;
-            padding: 5px 12px;
-            border-radius: 20px;
-            border: 1px solid;
-            font-weight: 600;
-        }
-        
-        .mode-pill.rescue {
-            color: #f97316;
-            border-color: #f97316;
-            background: #f9731610;
-        }
-        
-        .mode-pill.priority {
-            color: #facc15;
-            border-color: #facc15;
-            background: #facc1510;
-        }
-        
-        .mode-pill.overwhelm {
-            color: #60a5fa;
-            border-color: #60a5fa;
-            background: #60a5fa10;
-        }
-        /* ── Input card ── */
-        
-        .input-card {
-            background: #16161f;
-            border: 1px solid #2e2e3e;
-            border-radius: 16px;
-            padding: 24px;
+        .status-line span {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 9px;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 99px;
+            background: var(--sage);
+            box-shadow: 0 0 0 6px rgba(50, 119, 90, 0.12);
+        }
+        
+        .app-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 22px;
+        }
+        
+        .composer {
+            overflow: hidden;
+        }
+        
+        .bar {
+            height: 6px;
+            background: linear-gradient(90deg, var(--sage), var(--aqua), var(--coral));
+        }
+        
+        .compose-inner {
+            padding: 26px;
+        }
+        
+        .row-between {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 16px;
         }
         
-        .input-card label {
-            font-size: 0.85rem;
-            color: #aaa;
-            font-weight: 500;
+        label {
+            display: block;
+            font-size: 15px;
+            font-weight: 900;
+        }
+        
+        .counter {
+            color: var(--faint);
+            font-size: 12px;
+            font-weight: 800;
         }
         
         textarea {
             width: 100%;
-            min-height: 140px;
-            background: #0f0f13;
-            border: 1px solid #2e2e3e;
-            border-radius: 10px;
-            padding: 14px;
-            color: #e8e8f0;
-            font-size: 0.95rem;
-            font-family: inherit;
+            min-height: 190px;
+            margin-top: 14px;
             resize: vertical;
-            line-height: 1.6;
-            transition: border-color 0.2s;
+            border: 1px solid var(--line);
+            border-radius: 22px;
             outline: none;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--ink);
+            font: 600 15px/1.7 Inter, system-ui, sans-serif;
+            transition: box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
         }
         
         textarea:focus {
-            border-color: #f97316;
+            border-color: rgba(50, 119, 90, 0.52);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 0 0 4px rgba(50, 119, 90, 0.14);
         }
         
         textarea::placeholder {
-            color: #444;
+            color: #8f968d;
         }
-        /* ── Example chips ── */
         
-        .examples {
+        .moods,
+        .samples {
             display: flex;
-            gap: 8px;
             flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 14px;
         }
         
-        .example-chip {
-            font-size: 0.75rem;
-            padding: 5px 10px;
-            background: #1e1e2e;
-            border: 1px solid #2e2e3e;
-            border-radius: 8px;
-            color: #888;
+        .mood,
+        .sample {
+            min-height: 34px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 0 13px;
+            background: rgba(255, 255, 255, 0.56);
+            color: var(--muted);
+            font: 800 12px Inter, system-ui, sans-serif;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
         }
         
-        .example-chip:hover {
-            border-color: #f97316;
-            color: #f97316;
-        }
-        /* ── Submit button ── */
-        
-        .btn-primary {
-            padding: 14px 24px;
-            background: #f97316;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .btn-primary:hover {
-            background: #ea6c0a;
+        .mood:hover,
+        .sample:hover {
             transform: translateY(-1px);
+            background: #fff;
+            border-color: rgba(50, 119, 90, 0.34);
         }
         
-        .btn-primary:disabled {
-            background: #333;
-            color: #666;
+        .mood.active {
+            background: rgba(50, 119, 90, 0.12);
+            color: var(--sage-dark);
+            border-color: rgba(50, 119, 90, 0.32);
+        }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            margin-top: 18px;
+        }
+        
+        button.primary,
+        button.ghost {
+            min-height: 54px;
+            justify-content: center;
+            gap: 10px;
+            border-radius: 18px;
+            font: 900 14px Inter, system-ui, sans-serif;
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+        }
+        
+        button.primary {
+            border: 0;
+            background: linear-gradient(135deg, #17372b, var(--sage));
+            color: #fff;
+            box-shadow: 0 18px 34px rgba(31, 90, 66, 0.24);
+        }
+        
+        button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 44px rgba(31, 90, 66, 0.28);
+        }
+        
+        button.primary:disabled {
+            background: #daddd5;
+            color: #80887f;
+            box-shadow: none;
             cursor: not-allowed;
             transform: none;
         }
-        /* ── Loading state ── */
         
-        .loading-bar {
-            height: 3px;
-            background: linear-gradient(90deg, #f97316, #facc15, #f97316);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-            border-radius: 2px;
-            display: none;
+        button.ghost {
+            min-width: 112px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.58);
+            color: var(--muted);
         }
         
-        .loading-bar.active {
+        button.ghost:hover {
+            background: #fff;
+            transform: translateY(-1px);
+        }
+        
+        button svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.4;
+        }
+        
+        .progress {
+            height: 4px;
+            margin-top: 16px;
+            overflow: hidden;
+            opacity: 0;
+            border-radius: 999px;
+            background: rgba(35, 47, 39, 0.10);
+        }
+        
+        .progress.active {
+            opacity: 1;
+        }
+        
+        .progress span {
             display: block;
+            width: 45%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--sage), var(--aqua), var(--coral));
+            animation: load 1.25s ease-in-out infinite;
         }
         
-        @keyframes shimmer {
-            0% {
-                background-position: 200% 0;
+        @keyframes load {
+            from {
+                transform: translateX(-110%);
             }
-            100% {
-                background-position: -200% 0;
+            to {
+                transform: translateX(250%);
             }
         }
-        /* ── Output card ── */
         
-        .output-card {
-            background: #16161f;
-            border: 1px solid #2e2e3e;
-            border-radius: 16px;
-            padding: 24px;
+        .output {
             display: none;
-            flex-direction: column;
-            gap: 16px;
+            margin-top: 22px;
+            padding: 24px;
         }
         
-        .output-card.visible {
-            display: flex;
+        .output.visible {
+            display: block;
+            animation: up 0.28s ease;
         }
         
-        .output-header {
+        @keyframes up {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .plan-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 14px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--line);
         }
         
-        .output-header h2 {
-            font-size: 0.85rem;
-            color: #f97316;
-            font-weight: 700;
+        .plan-title {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font: 900 13px Inter, system-ui, sans-serif;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
         
-        .btn-copy {
-            font-size: 0.75rem;
-            padding: 5px 12px;
-            background: transparent;
-            border: 1px solid #2e2e3e;
-            border-radius: 6px;
-            color: #888;
-            cursor: pointer;
-            transition: all 0.15s;
+        .icon {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            background: rgba(50, 119, 90, 0.12);
+            color: var(--sage-dark);
         }
         
-        .btn-copy:hover {
-            border-color: #f97316;
-            color: #f97316;
+        .icon svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.6;
         }
         
-        .plan-output {
-            font-size: 0.95rem;
-            line-height: 1.8;
-            color: #d0d0e0;
+        .plan-text {
+            padding: 18px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.62);
             white-space: pre-wrap;
             word-break: break-word;
-        }
-        /* Color the emoji lines */
-        
-        .plan-output .rescue {
-            color: #f97316;
-            font-weight: 700;
+            color: var(--ink);
+            font-size: 14.5px;
+            line-height: 1.9;
         }
         
-        .plan-output .critical {
-            color: #f87171;
+        .ln {
+            display: block;
         }
         
-        .plan-output .important {
-            color: #facc15;
+        .ln-rescue {
+            color: var(--coral);
+            font-weight: 900;
         }
         
-        .plan-output .canwait {
-            color: #4ade80;
+        .ln-crit {
+            color: #c94f3c;
+            font-weight: 800;
         }
         
-        .plan-output .schedule {
-            color: #60a5fa;
+        .ln-imp {
+            color: var(--amber);
+            font-weight: 800;
         }
         
-        .plan-output .motivation {
-            color: #a78bfa;
+        .ln-wait {
+            color: var(--sage-dark);
         }
-        /* ── Reschedule section ── */
         
-        .reschedule-section {
+        .ln-sched {
+            color: var(--blue);
+        }
+        
+        .ln-mot {
+            color: var(--lav);
+            font-style: italic;
+        }
+        
+        .revise {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
             display: none;
-            flex-direction: column;
-            gap: 12px;
-            padding-top: 16px;
-            border-top: 1px solid #2e2e3e;
         }
         
-        .reschedule-section.visible {
-            display: flex;
+        .revise.visible {
+            display: block;
         }
         
-        .reschedule-section label {
-            font-size: 0.85rem;
-            color: #aaa;
+        .revise textarea {
+            min-height: 88px;
         }
         
-        .reschedule-section textarea {
-            min-height: 80px;
+        .side {
+            display: grid;
+            gap: 16px;
+            align-content: start;
         }
         
-        .btn-secondary {
-            padding: 11px 20px;
-            background: transparent;
-            color: #f97316;
-            border: 1px solid #f97316;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-secondary:hover {
-            background: #f9731610;
-        }
-        /* ── Footer ── */
-        
-        footer {
-            text-align: center;
+        .side-card {
             padding: 20px;
-            color: #444;
-            font-size: 0.75rem;
-            border-top: 1px solid #1e1e2e;
         }
         
-        footer span {
-            color: #666;
+        .side-card h2 {
+            margin-bottom: 13px;
+            font: 900 15px Sora, sans-serif;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat {
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.52);
+        }
+        
+        .stat b {
+            display: block;
+            font-size: 24px;
+        }
+        
+        .stat span {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+        }
+        
+        .history {
+            display: grid;
+            gap: 9px;
+        }
+        
+        .history button {
+            width: 100%;
+            min-height: auto;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 11px;
+            background: rgba(255, 255, 255, 0.54);
+            color: var(--muted);
+            text-align: left;
+            font: 700 12px/1.4 Inter, system-ui, sans-serif;
+            cursor: pointer;
+        }
+        
+        .empty {
+            color: var(--faint);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .toast {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 20;
+            max-width: 320px;
+            padding: 13px 15px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.86);
+            color: var(--ink);
+            box-shadow: var(--soft-shadow);
+            transform: translateY(18px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            font-size: 13px;
+            font-weight: 800;
+        }
+        
+        .toast.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 900px) {
+            .hero,
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 620px) {
+            header {
+                height: auto;
+                min-height: 66px;
+                padding: 12px 16px;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            .userbar {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+            main {
+                padding: 34px 14px 54px;
+            }
+            h1 {
+                font-size: 40px;
+            }
+            .compose-inner,
+            .output,
+            .side-card,
+            .pulse-card {
+                padding: 18px;
+            }
+            .actions {
+                grid-template-columns: 1fr;
+            }
+            button.ghost {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
 <body>
-
     <header>
-        <div class="logo">Deadline<span>AI</span></div>
-        <div class="badge">Vibe2Ship 2026 · Powered by Gemini</div>
+        <a class="brand" href="/">
+            <span class="mark"><svg viewBox="0 0 18 18"><path d="M3 11.5 6.4 5l3.2 6 2.2-3.8L15 11.5"/><path d="M3 14.5h12"/></svg></span> DeadlineAI
+        </a>
+        <div class="userbar">
+            <span class="pill">Signed in as {{ username }}</span>
+            <a class="logout" href="/logout">Logout</a>
+        </div>
     </header>
 
     <main>
+        <section class="hero">
+            <div>
+                <h1>Turn deadline panic into <span>calm action.</span></h1>
+                <p>Pick your current state, dump the messy task pile, and get a priority plan you can start immediately.</p>
+            </div>
+            <aside class="pulse-card">
+                <strong>Today in DeadlineAI</strong>
+                <div class="status-line">
+                    <span><i class="dot"></i> Login protected workspace</span>
+                    <span><i class="dot"></i> Interactive mood-aware prompt builder</span>
+                    <span><i class="dot"></i> Recent plan history saved in browser</span>
+                </div>
+            </aside>
+        </section>
 
-        <!-- Hero -->
-        <div class="hero">
-            <h1>Your <span>Last-Minute</span><br>Life Saver</h1>
-            <p>Dump your tasks and deadlines in plain English. DeadlineAI tells you exactly what to do, in what order, right now.</p>
-        </div>
+        <div class="app-grid">
+            <div>
+                <section class="composer">
+                    <div class="bar"></div>
+                    <div class="compose-inner">
+                        <div class="row-between">
+                            <label for="taskInput">What's happening right now?</label>
+                            <span class="counter" id="counter">0 chars</span>
+                        </div>
+                        <textarea id="taskInput" placeholder="Example: I have a physics exam tomorrow morning, a coding assignment due Friday, and a form due tonight. It is 10pm and I have not started."></textarea>
 
-        <!-- Mode indicators -->
-        <div class="modes">
-            <div class="mode-pill rescue">⚡ Rescue Mode</div>
-            <div class="mode-pill priority">📋 Priority Mode</div>
-            <div class="mode-pill overwhelm">🧠 Overwhelm Mode</div>
-        </div>
+                        <div class="moods" aria-label="Current mood">
+                            <button class="mood" type="button" data-mood="I am panicking and need a rescue plan.">Panicking</button>
+                            <button class="mood" type="button" data-mood="I feel scattered and need priorities.">Scattered</button>
+                            <button class="mood" type="button" data-mood="I am calm but need a sharp schedule.">Calm</button>
+                        </div>
 
-        <!-- Input -->
-        <div class="input-card">
-            <label>Tell DeadlineAI your situation — be as messy as you want</label>
-            <textarea id="taskInput" placeholder="e.g. I have a physics exam tomorrow at 9am, two coding assignments due Friday, haven't started either, and I need to submit a form by midnight tonight. It's 10pm now. Help."></textarea>
+                        <div class="samples">
+                            <button class="sample" type="button" onclick="fillExample(0)">Exam tomorrow</button>
+                            <button class="sample" type="button" onclick="fillExample(1)">Work overload</button>
+                            <button class="sample" type="button" onclick="fillExample(2)">Too many tasks</button>
+                        </div>
 
-            <div class="examples">
-                <span style="font-size:0.75rem; color:#555; align-self:center;">Try:</span>
-                <div class="example-chip" onclick="fillExample(0)">🎓 Student with exam tomorrow</div>
-                <div class="example-chip" onclick="fillExample(1)">💼 Professional with meeting overload</div>
-                <div class="example-chip" onclick="fillExample(2)">😰 Overwhelmed with 8 tasks</div>
+                        <div class="progress" id="progress"><span></span></div>
+
+                        <div class="actions">
+                            <button class="primary" id="mainBtn" onclick="getPlan()">
+              <svg viewBox="0 0 18 18"><path d="M3 9h12"/><path d="m10 4 5 5-5 5"/></svg>
+              <span id="btnLabel">Build my plan</span>
+            </button>
+                            <button class="ghost" type="button" onclick="clearInput()">Clear</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="output" id="outputBlock">
+                    <div class="plan-head">
+                        <div class="plan-title">
+                            <span class="icon"><svg viewBox="0 0 16 16"><path d="m3 8.5 3 3L13 4"/></svg></span> Your Plan
+                        </div>
+                        <button class="ghost" type="button" onclick="copyPlan()">Copy</button>
+                    </div>
+                    <div class="plan-text" id="planOut"></div>
+                    <div class="revise" id="reviseSection">
+                        <label for="updateInput">Something changed?</label>
+                        <textarea id="updateInput" placeholder="Example: I lost one hour, and the form deadline moved earlier."></textarea>
+                        <div class="actions">
+                            <button class="primary" onclick="revisePlan()">
+              <svg viewBox="0 0 18 18"><path d="M15 4v5h-5"/><path d="M3 14V9h5"/><path d="M4.4 6.5A6 6 0 0 1 15 9"/><path d="M13.6 11.5A6 6 0 0 1 3 9"/></svg>
+              Revise plan
+            </button>
+                        </div>
+                    </div>
+                </section>
             </div>
 
-            <div class="loading-bar" id="loadingBar"></div>
-
-            <button class="btn-primary" id="submitBtn" onclick="generatePlan()">
-      <span id="btnText">⚡ Get My Plan</span>
-    </button>
+            <aside class="side">
+                <section class="side-card">
+                    <h2>Session stats</h2>
+                    <div class="stats">
+                        <div class="stat"><b id="plansCount">0</b><span>plans</span></div>
+                        <div class="stat"><b id="wordsCount">0</b><span>words typed</span></div>
+                    </div>
+                </section>
+                <section class="side-card">
+                    <h2>Recent plans</h2>
+                    <div class="history" id="historyList">
+                        <p class="empty">No plans yet. Your latest plans will appear here during this browser session.</p>
+                    </div>
+                </section>
+            </aside>
         </div>
-
-        <!-- Output -->
-        <div class="output-card" id="outputCard">
-            <div class="output-header">
-                <h2>📋 Your DeadlineAI Plan</h2>
-                <button class="btn-copy" onclick="copyPlan()">Copy Plan</button>
-            </div>
-            <div class="plan-output" id="planOutput"></div>
-
-            <!-- Reschedule -->
-            <div class="reschedule-section" id="rescheduleSection">
-                <label>Something changed? Tell DeadlineAI and get a revised plan:</label>
-                <textarea id="updateInput" placeholder="e.g. I couldn't finish the first task, I now have 2 fewer hours..."></textarea>
-                <button class="btn-secondary" onclick="reschedulePlan()">🔄 Revise My Plan</button>
-            </div>
-        </div>
-
     </main>
 
-    <footer>
-        Built by <span>Dheer Parekh</span> · Ramdeobaba University, Nagpur · Vibe2Ship Hackathon 2026
-    </footer>
+    <div class="toast" id="toast"></div>
 
     <script>
         const EXAMPLES = [
-            "I have a physics exam tomorrow at 9am, two coding assignments due Friday (it's Monday night now), and I need to submit a college form by midnight tonight. I haven't started any of them. It's 10pm. What do I do?",
-            "I'm a software developer. I have a client presentation tomorrow at 2pm, three pending pull requests from my team, a sprint review meeting at 11am, and a report due to my manager by EOD. It's 9am and I don't know what to tackle first.",
-            "I am completely overwhelmed. I have 8 things due this week — two university assignments, one lab report, revision for two subjects, a club event I'm organizing, a part-time shift tomorrow, and a friend's birthday I forgot about. I don't know where to even start. I'm stressed out."
+            "I have a physics exam tomorrow at 9am, two coding assignments due Friday, and a college form due by midnight tonight. I have not started any of them. It is 10pm. What do I do?",
+            "I have a client presentation tomorrow at 2pm, three pending pull requests, a sprint review at 11am, and a manager report due by EOD. It is 9am and I do not know what to tackle first.",
+            "I am completely overwhelmed. I have 8 things due this week: two assignments, a lab report, revision for two subjects, a club event, a part-time shift tomorrow, and a friend's birthday I forgot."
         ];
 
+        const input = document.getElementById("taskInput");
+        const counter = document.getElementById("counter");
+        let selectedMood = "";
         let lastInput = "";
         let lastPlan = "";
+        let history = JSON.parse(sessionStorage.getItem("deadlineai_history") || "[]");
+
+        renderHistory();
+        updateStats();
+
+        input.addEventListener("input", updateStats);
+        document.addEventListener("keydown", event => {
+            if (event.ctrlKey && event.key === "Enter") getPlan();
+        });
+
+        document.querySelectorAll(".mood").forEach(button => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".mood").forEach(item => item.classList.remove("active"));
+                button.classList.add("active");
+                selectedMood = button.dataset.mood;
+                toast("Mood added to your prompt.");
+            });
+        });
 
         function fillExample(index) {
-            document.getElementById("taskInput").value = EXAMPLES[index];
+            input.value = EXAMPLES[index];
+            input.focus();
+            updateStats();
         }
 
-        async function generatePlan() {
-            const input = document.getElementById("taskInput").value.trim();
-            if (!input) {
-                alert("Please describe your tasks first!");
+        function clearInput() {
+            input.value = "";
+            input.focus();
+            updateStats();
+        }
+
+        async function getPlan() {
+            const raw = input.value.trim();
+            if (!raw) {
+                shake(input);
+                toast("Add your tasks first.");
                 return;
             }
 
-            lastInput = input;
+            lastInput = selectedMood ? `${selectedMood}\n\n${raw}` : raw;
             setLoading(true);
 
             try {
-                const res = await fetch("/api/plan", {
+                const response = await fetch("/api/plan", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        input
+                        input: lastInput
                     })
                 });
-                const data = await res.json();
-
-                if (data.error) {
-                    showError(data.error);
-                } else {
+                const data = await response.json();
+                if (!response.ok || data.error) showError(data.error || "Could not build a plan.");
+                else {
                     lastPlan = data.plan;
                     showPlan(data.plan);
+                    saveHistory(raw, data.plan);
                 }
-            } catch (err) {
-                showError("Connection error. Please try again.");
+            } catch {
+                showError("Connection error - please try again.");
             } finally {
                 setLoading(false);
             }
         }
 
-        async function reschedulePlan() {
+        async function revisePlan() {
             const update = document.getElementById("updateInput").value.trim();
             if (!update) {
-                alert("Tell me what changed!");
+                shake(document.getElementById("updateInput"));
+                toast("Tell me what changed first.");
                 return;
             }
 
             setLoading(true);
-
             try {
-                const res = await fetch("/api/reschedule", {
+                const response = await fetch("/api/reschedule", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        original_plan: lastInput,
+                        original_plan: lastPlan || lastInput,
                         update
                     })
                 });
-                const data = await res.json();
-
-                if (data.error) {
-                    showError(data.error);
-                } else {
+                const data = await response.json();
+                if (!response.ok || data.error) showError(data.error || "Could not revise the plan.");
+                else {
                     lastPlan = data.plan;
                     showPlan(data.plan);
                     document.getElementById("updateInput").value = "";
+                    saveHistory(`Revision: ${update}`, data.plan);
                 }
-            } catch (err) {
-                showError("Connection error. Please try again.");
+            } catch {
+                showError("Connection error - please try again.");
             } finally {
                 setLoading(false);
             }
         }
 
         function showPlan(plan) {
-            const outputCard = document.getElementById("outputCard");
-            const planOutput = document.getElementById("planOutput");
-
-            // Render the plan text with colored lines based on emoji/keywords
-            planOutput.innerHTML = formatPlan(plan);
-            outputCard.classList.add("visible");
-            document.getElementById("rescheduleSection").classList.add("visible");
-            outputCard.scrollIntoView({
+            document.getElementById("planOut").innerHTML = formatPlan(plan);
+            document.getElementById("outputBlock").classList.add("visible");
+            document.getElementById("reviseSection").classList.add("visible");
+            setTimeout(() => document.getElementById("outputBlock").scrollIntoView({
                 behavior: "smooth",
                 block: "start"
-            });
+            }), 60);
+        }
+
+        function showError(message) {
+            lastPlan = "";
+            document.getElementById("planOut").innerHTML = `<span class="ln ln-crit">Warning: ${escapeHtml(message)}</span>`;
+            document.getElementById("outputBlock").classList.add("visible");
+            toast(message);
         }
 
         function formatPlan(text) {
             return text.split("\n").map(line => {
-                if (line.includes("⚡") || line.includes("RESCUE"))
-                    return `<div class="rescue">${escape(line)}</div>`;
-                if (line.includes("🔴") || line.includes("CRITICAL"))
-                    return `<div class="critical">${escape(line)}</div>`;
-                if (line.includes("🟡") || line.includes("IMPORTANT"))
-                    return `<div class="important">${escape(line)}</div>`;
-                if (line.includes("🟢") || line.includes("CAN WAIT"))
-                    return `<div class="canwait">${escape(line)}</div>`;
-                if (line.includes("⏰") || line.includes("SCHEDULE"))
-                    return `<div class="schedule">${escape(line)}</div>`;
-                if (line.includes("💬"))
-                    return `<div class="motivation">${escape(line)}</div>`;
-                return `<div>${escape(line)}</div>`;
+                const upper = line.toUpperCase();
+                let cls = "ln";
+                if (upper.includes("RESCUE")) cls += " ln-rescue";
+                else if (upper.includes("CRITICAL")) cls += " ln-crit";
+                else if (upper.includes("IMPORTANT")) cls += " ln-imp";
+                else if (upper.includes("CAN WAIT")) cls += " ln-wait";
+                else if (upper.includes("SCHEDULE")) cls += " ln-sched";
+                else if (upper.includes("REMEMBER") || upper.includes("MOTIVATING")) cls += " ln-mot";
+                return `<span class="${cls}">${escapeHtml(line)}</span>`;
             }).join("");
         }
 
-        function escape(text) {
-            return text
+        function escapeHtml(text) {
+            return String(text)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;");
         }
 
-        function showError(msg) {
-            const outputCard = document.getElementById("outputCard");
-            const planOutput = document.getElementById("planOutput");
-            planOutput.innerHTML = `<div style="color:#f87171">❌ ${msg}</div>`;
-            outputCard.classList.add("visible");
-        }
-
-        function setLoading(isLoading) {
-            const btn = document.getElementById("submitBtn");
-            const btnText = document.getElementById("btnText");
-            const bar = document.getElementById("loadingBar");
-
-            btn.disabled = isLoading;
-            btnText.textContent = isLoading ? "Analyzing your deadlines..." : "⚡ Get My Plan";
-            bar.classList.toggle("active", isLoading);
+        function setLoading(on) {
+            document.getElementById("mainBtn").disabled = on;
+            document.getElementById("btnLabel").textContent = on ? "Analyzing..." : "Build my plan";
+            document.getElementById("progress").classList.toggle("active", on);
         }
 
         function copyPlan() {
-            navigator.clipboard.writeText(lastPlan).then(() => {
-                const btn = document.querySelector(".btn-copy");
-                btn.textContent = "Copied!";
-                setTimeout(() => btn.textContent = "Copy Plan", 2000);
-            });
+            if (!lastPlan) {
+                toast("No plan to copy yet.");
+                return;
+            }
+            navigator.clipboard.writeText(lastPlan).then(() => toast("Plan copied."));
         }
 
-        // Allow Ctrl+Enter to submit
-        document.getElementById("taskInput").addEventListener("keydown", function(e) {
-            if (e.ctrlKey && e.key === "Enter") generatePlan();
-        });
-    </script>
+        function saveHistory(prompt, plan) {
+            history.unshift({
+                prompt,
+                plan,
+                time: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })
+            });
+            history = history.slice(0, 5);
+            sessionStorage.setItem("deadlineai_history", JSON.stringify(history));
+            renderHistory();
+            updateStats();
+        }
 
+        function renderHistory() {
+            const list = document.getElementById("historyList");
+            if (!history.length) {
+                list.innerHTML = '<p class="empty">No plans yet. Your latest plans will appear here during this browser session.</p>';
+                return;
+            }
+
+            list.innerHTML = history.map((item, index) => `
+      <button type="button" onclick="openHistory(${index})">
+        ${item.time} - ${escapeHtml(item.prompt.slice(0, 72))}${item.prompt.length > 72 ? "..." : ""}
+      </button>
+    `).join("");
+        }
+
+        function openHistory(index) {
+            const item = history[index];
+            if (!item) return;
+            input.value = item.prompt;
+            lastInput = item.prompt;
+            lastPlan = item.plan;
+            showPlan(item.plan);
+            updateStats();
+            toast("Loaded a recent plan.");
+        }
+
+        function updateStats() {
+            const value = input.value.trim();
+            const words = value ? value.split(/\s+/).length : 0;
+            counter.textContent = `${input.value.length} chars`;
+            document.getElementById("wordsCount").textContent = words;
+            document.getElementById("plansCount").textContent = history.length;
+        }
+
+        function shake(element) {
+            element.style.animation = "none";
+            element.offsetHeight;
+            element.style.animation = "shake 0.38s ease";
+            setTimeout(() => {
+                element.style.animation = "";
+            }, 420);
+        }
+
+        function toast(message) {
+            const el = document.getElementById("toast");
+            el.textContent = message;
+            el.classList.add("visible");
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => el.classList.remove("visible"), 2200);
+        }
+
+        const style = document.createElement("style");
+        style.textContent = "@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}";
+        document.head.appendChild(style);
+    </script>
 </body>
 
 </html>
