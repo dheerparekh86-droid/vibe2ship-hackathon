@@ -1,45 +1,583 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Vibe2Ship Starter</title>
-<style>
-  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 60px auto; padding: 0 20px; color: #1a1a1a; }
-  h1 { font-size: 1.4rem; }
-  textarea { width: 100%; min-height: 100px; padding: 10px; font-size: 1rem; box-sizing: border-box; }
-  button { margin-top: 10px; padding: 10px 18px; font-size: 1rem; cursor: pointer; }
-  #result { margin-top: 20px; padding: 14px; background: #f4f4f4; border-radius: 6px; white-space: pre-wrap; min-height: 40px; }
-  .loading { opacity: 0.6; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadlineAI — Last-Minute Life Saver</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0f0f13;
+            color: #e8e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* ── Header ── */
+        
+        header {
+            padding: 20px 32px;
+            border-bottom: 1px solid #1e1e2e;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        
+        .logo span {
+            color: #f97316;
+        }
+        
+        .badge {
+            font-size: 0.7rem;
+            background: #1e1e2e;
+            color: #888;
+            padding: 3px 8px;
+            border-radius: 20px;
+            border: 1px solid #2e2e3e;
+        }
+        /* ── Main layout ── */
+        
+        main {
+            flex: 1;
+            max-width: 780px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+        /* ── Hero ── */
+        
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+        
+        .hero h1 span {
+            color: #f97316;
+        }
+        
+        .hero p {
+            color: #888;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        /* ── Mode pills ── */
+        
+        .modes {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .mode-pill {
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid;
+            font-weight: 600;
+        }
+        
+        .mode-pill.rescue {
+            color: #f97316;
+            border-color: #f97316;
+            background: #f9731610;
+        }
+        
+        .mode-pill.priority {
+            color: #facc15;
+            border-color: #facc15;
+            background: #facc1510;
+        }
+        
+        .mode-pill.overwhelm {
+            color: #60a5fa;
+            border-color: #60a5fa;
+            background: #60a5fa10;
+        }
+        /* ── Input card ── */
+        
+        .input-card {
+            background: #16161f;
+            border: 1px solid #2e2e3e;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .input-card label {
+            font-size: 0.85rem;
+            color: #aaa;
+            font-weight: 500;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            background: #0f0f13;
+            border: 1px solid #2e2e3e;
+            border-radius: 10px;
+            padding: 14px;
+            color: #e8e8f0;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            line-height: 1.6;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        
+        textarea:focus {
+            border-color: #f97316;
+        }
+        
+        textarea::placeholder {
+            color: #444;
+        }
+        /* ── Example chips ── */
+        
+        .examples {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .example-chip {
+            font-size: 0.75rem;
+            padding: 5px 10px;
+            background: #1e1e2e;
+            border: 1px solid #2e2e3e;
+            border-radius: 8px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .example-chip:hover {
+            border-color: #f97316;
+            color: #f97316;
+        }
+        /* ── Submit button ── */
+        
+        .btn-primary {
+            padding: 14px 24px;
+            background: #f97316;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:hover {
+            background: #ea6c0a;
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        /* ── Loading state ── */
+        
+        .loading-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #f97316, #facc15, #f97316);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 2px;
+            display: none;
+        }
+        
+        .loading-bar.active {
+            display: block;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+        /* ── Output card ── */
+        
+        .output-card {
+            background: #16161f;
+            border: 1px solid #2e2e3e;
+            border-radius: 16px;
+            padding: 24px;
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .output-card.visible {
+            display: flex;
+        }
+        
+        .output-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .output-header h2 {
+            font-size: 0.85rem;
+            color: #f97316;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .btn-copy {
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            background: transparent;
+            border: 1px solid #2e2e3e;
+            border-radius: 6px;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .btn-copy:hover {
+            border-color: #f97316;
+            color: #f97316;
+        }
+        
+        .plan-output {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #d0d0e0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        /* Color the emoji lines */
+        
+        .plan-output .rescue {
+            color: #f97316;
+            font-weight: 700;
+        }
+        
+        .plan-output .critical {
+            color: #f87171;
+        }
+        
+        .plan-output .important {
+            color: #facc15;
+        }
+        
+        .plan-output .canwait {
+            color: #4ade80;
+        }
+        
+        .plan-output .schedule {
+            color: #60a5fa;
+        }
+        
+        .plan-output .motivation {
+            color: #a78bfa;
+        }
+        /* ── Reschedule section ── */
+        
+        .reschedule-section {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            padding-top: 16px;
+            border-top: 1px solid #2e2e3e;
+        }
+        
+        .reschedule-section.visible {
+            display: flex;
+        }
+        
+        .reschedule-section label {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        
+        .reschedule-section textarea {
+            min-height: 80px;
+        }
+        
+        .btn-secondary {
+            padding: 11px 20px;
+            background: transparent;
+            color: #f97316;
+            border: 1px solid #f97316;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9731610;
+        }
+        /* ── Footer ── */
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #444;
+            font-size: 0.75rem;
+            border-top: 1px solid #1e1e2e;
+        }
+        
+        footer span {
+            color: #666;
+        }
+    </style>
 </head>
+
 <body>
-  <h1>Vibe2Ship Starter — Gemini Test UI</h1>
-  <p>Type something below and hit submit. Swap this UI once you know your real task.</p>
-  <textarea id="userInput" placeholder="Enter input here..."></textarea><br>
-  <button onclick="submitInput()">Submit</button>
-  <div id="result"></div>
 
-<script>
-async function submitInput() {
-  const input = document.getElementById("userInput").value;
-  const resultDiv = document.getElementById("result");
-  resultDiv.textContent = "Thinking...";
-  resultDiv.classList.add("loading");
+    <header>
+        <div class="logo">Deadline<span>AI</span></div>
+        <div class="badge">Vibe2Ship 2026 · Powered by Gemini</div>
+    </header>
 
-  try {
-    const res = await fetch("/api/process", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ input })
-    });
-    const data = await res.json();
-    resultDiv.classList.remove("loading");
-    resultDiv.textContent = data.result || data.error || "No response";
-  } catch (err) {
-    resultDiv.classList.remove("loading");
-    resultDiv.textContent = "Error: " + err.message;
-  }
-}
-</script>
+    <main>
+
+        <!-- Hero -->
+        <div class="hero">
+            <h1>Your <span>Last-Minute</span><br>Life Saver</h1>
+            <p>Dump your tasks and deadlines in plain English. DeadlineAI tells you exactly what to do, in what order, right now.</p>
+        </div>
+
+        <!-- Mode indicators -->
+        <div class="modes">
+            <div class="mode-pill rescue">⚡ Rescue Mode</div>
+            <div class="mode-pill priority">📋 Priority Mode</div>
+            <div class="mode-pill overwhelm">🧠 Overwhelm Mode</div>
+        </div>
+
+        <!-- Input -->
+        <div class="input-card">
+            <label>Tell DeadlineAI your situation — be as messy as you want</label>
+            <textarea id="taskInput" placeholder="e.g. I have a physics exam tomorrow at 9am, two coding assignments due Friday, haven't started either, and I need to submit a form by midnight tonight. It's 10pm now. Help."></textarea>
+
+            <div class="examples">
+                <span style="font-size:0.75rem; color:#555; align-self:center;">Try:</span>
+                <div class="example-chip" onclick="fillExample(0)">🎓 Student with exam tomorrow</div>
+                <div class="example-chip" onclick="fillExample(1)">💼 Professional with meeting overload</div>
+                <div class="example-chip" onclick="fillExample(2)">😰 Overwhelmed with 8 tasks</div>
+            </div>
+
+            <div class="loading-bar" id="loadingBar"></div>
+
+            <button class="btn-primary" id="submitBtn" onclick="generatePlan()">
+      <span id="btnText">⚡ Get My Plan</span>
+    </button>
+        </div>
+
+        <!-- Output -->
+        <div class="output-card" id="outputCard">
+            <div class="output-header">
+                <h2>📋 Your DeadlineAI Plan</h2>
+                <button class="btn-copy" onclick="copyPlan()">Copy Plan</button>
+            </div>
+            <div class="plan-output" id="planOutput"></div>
+
+            <!-- Reschedule -->
+            <div class="reschedule-section" id="rescheduleSection">
+                <label>Something changed? Tell DeadlineAI and get a revised plan:</label>
+                <textarea id="updateInput" placeholder="e.g. I couldn't finish the first task, I now have 2 fewer hours..."></textarea>
+                <button class="btn-secondary" onclick="reschedulePlan()">🔄 Revise My Plan</button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        Built by <span>Dheer Parekh</span> · Ramdeobaba University, Nagpur · Vibe2Ship Hackathon 2026
+    </footer>
+
+    <script>
+        const EXAMPLES = [
+            "I have a physics exam tomorrow at 9am, two coding assignments due Friday (it's Monday night now), and I need to submit a college form by midnight tonight. I haven't started any of them. It's 10pm. What do I do?",
+            "I'm a software developer. I have a client presentation tomorrow at 2pm, three pending pull requests from my team, a sprint review meeting at 11am, and a report due to my manager by EOD. It's 9am and I don't know what to tackle first.",
+            "I am completely overwhelmed. I have 8 things due this week — two university assignments, one lab report, revision for two subjects, a club event I'm organizing, a part-time shift tomorrow, and a friend's birthday I forgot about. I don't know where to even start. I'm stressed out."
+        ];
+
+        let lastInput = "";
+        let lastPlan = "";
+
+        function fillExample(index) {
+            document.getElementById("taskInput").value = EXAMPLES[index];
+        }
+
+        async function generatePlan() {
+            const input = document.getElementById("taskInput").value.trim();
+            if (!input) {
+                alert("Please describe your tasks first!");
+                return;
+            }
+
+            lastInput = input;
+            setLoading(true);
+
+            try {
+                const res = await fetch("/api/plan", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        input
+                    })
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    lastPlan = data.plan;
+                    showPlan(data.plan);
+                }
+            } catch (err) {
+                showError("Connection error. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function reschedulePlan() {
+            const update = document.getElementById("updateInput").value.trim();
+            if (!update) {
+                alert("Tell me what changed!");
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const res = await fetch("/api/reschedule", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        original_plan: lastInput,
+                        update
+                    })
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    lastPlan = data.plan;
+                    showPlan(data.plan);
+                    document.getElementById("updateInput").value = "";
+                }
+            } catch (err) {
+                showError("Connection error. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function showPlan(plan) {
+            const outputCard = document.getElementById("outputCard");
+            const planOutput = document.getElementById("planOutput");
+
+            // Render the plan text with colored lines based on emoji/keywords
+            planOutput.innerHTML = formatPlan(plan);
+            outputCard.classList.add("visible");
+            document.getElementById("rescheduleSection").classList.add("visible");
+            outputCard.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+
+        function formatPlan(text) {
+            return text.split("\n").map(line => {
+                if (line.includes("⚡") || line.includes("RESCUE"))
+                    return `<div class="rescue">${escape(line)}</div>`;
+                if (line.includes("🔴") || line.includes("CRITICAL"))
+                    return `<div class="critical">${escape(line)}</div>`;
+                if (line.includes("🟡") || line.includes("IMPORTANT"))
+                    return `<div class="important">${escape(line)}</div>`;
+                if (line.includes("🟢") || line.includes("CAN WAIT"))
+                    return `<div class="canwait">${escape(line)}</div>`;
+                if (line.includes("⏰") || line.includes("SCHEDULE"))
+                    return `<div class="schedule">${escape(line)}</div>`;
+                if (line.includes("💬"))
+                    return `<div class="motivation">${escape(line)}</div>`;
+                return `<div>${escape(line)}</div>`;
+            }).join("");
+        }
+
+        function escape(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+        }
+
+        function showError(msg) {
+            const outputCard = document.getElementById("outputCard");
+            const planOutput = document.getElementById("planOutput");
+            planOutput.innerHTML = `<div style="color:#f87171">❌ ${msg}</div>`;
+            outputCard.classList.add("visible");
+        }
+
+        function setLoading(isLoading) {
+            const btn = document.getElementById("submitBtn");
+            const btnText = document.getElementById("btnText");
+            const bar = document.getElementById("loadingBar");
+
+            btn.disabled = isLoading;
+            btnText.textContent = isLoading ? "Analyzing your deadlines..." : "⚡ Get My Plan";
+            bar.classList.toggle("active", isLoading);
+        }
+
+        function copyPlan() {
+            navigator.clipboard.writeText(lastPlan).then(() => {
+                const btn = document.querySelector(".btn-copy");
+                btn.textContent = "Copied!";
+                setTimeout(() => btn.textContent = "Copy Plan", 2000);
+            });
+        }
+
+        // Allow Ctrl+Enter to submit
+        document.getElementById("taskInput").addEventListener("keydown", function(e) {
+            if (e.ctrlKey && e.key === "Enter") generatePlan();
+        });
+    </script>
+
 </body>
+
 </html>
