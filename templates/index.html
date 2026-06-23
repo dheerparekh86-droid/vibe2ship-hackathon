@@ -879,13 +879,17 @@
             return text.split("\n").map(line => {
                 const upper = line.toUpperCase();
                 let cls = "ln";
-                if (upper.includes("RESCUE")) cls += " ln-rescue";
-                else if (upper.includes("CRITICAL")) cls += " ln-crit";
-                else if (upper.includes("IMPORTANT")) cls += " ln-imp";
-                else if (upper.includes("CAN WAIT")) cls += " ln-wait";
-                else if (upper.includes("SCHEDULE")) cls += " ln-sched";
-                else if (upper.includes("REMEMBER") || upper.includes("MOTIVATING")) cls += " ln-mot";
-                return `<span class="${cls}">${escapeHtml(line)}</span>`;
+                if (line.includes("⚡") || upper.includes("RESCUE")) cls += " ln-rescue";
+                else if (line.includes("🔴") || upper.includes("RIGHT NOW") || upper.includes("CRITICAL")) cls += " ln-crit";
+                else if (line.includes("🟡") || upper.includes("IMPORTANT")) cls += " ln-imp";
+                else if (line.includes("🟢") || upper.includes("CAN WAIT") || upper.includes("THIS WEEK")) cls += " ln-wait";
+                else if (line.includes("⏰") || upper.includes("SCHEDULE")) cls += " ln-sched";
+                else if (line.includes("⚠️") || upper.includes("REAL TALK")) cls += " ln-crit";
+                else if (line.includes("💬")) cls += " ln-mot";
+                const span = document.createElement("span");
+                span.className = cls;
+                span.textContent = line; // textContent handles emojis natively, no escaping needed
+                return span.outerHTML;
             }).join("");
         }
 
