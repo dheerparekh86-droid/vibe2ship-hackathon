@@ -18,7 +18,7 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "deadlineai-dev-secret-change-me")
 
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "gemini-2.5-flash"
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 DEMO_USER = os.environ.get("DEADLINEAI_USER", "demo")
