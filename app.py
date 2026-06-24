@@ -5,6 +5,7 @@ Builder: Dheer Parekh | Ramdeobaba University, Nagpur
 """
 
 import os
+import json
 from functools import wraps
 
 from dotenv import load_dotenv
@@ -18,13 +19,14 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "deadlineai-dev-secret-change-me")
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-2.0-flash"
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 DEMO_USER = os.environ.get("DEADLINEAI_USER", "demo")
 DEMO_PASSWORD_HASH = generate_password_hash(os.environ.get("DEADLINEAI_PASSWORD", "deadline123"))
 
 
+# ─── Original System Instruction (unchanged) ──────────────────────────────────
 SYSTEM_INSTRUCTION = """
 You are DeadlineAI — a calm, brilliant best friend who is exceptionally good at time management and getting people unstuck.
 
@@ -114,6 +116,65 @@ OVERWHELM MODE — trigger when:
 """
 
 
+# ─── NEW: Calendar extraction instruction ─────────────────────────────────────
+CALENDAR_INSTRUCTION = """
+You are a calendar event extractor. Given a productivity plan, extract all time-based tasks and return them as a JSON array.
+
+Today's date context: use relative terms like "today", "tomorrow", "this week" relative to now.
+
+Return ONLY a valid JSON array, no markdown, no explanation, no extra text.
+
+Each event object must have exactly these fields:
+{
+  "title": "short task name (max 50 chars)",
+  "date": "YYYY-MM-DD",
+  "start_time": "HH:MM",
+  "end_time": "HH:MM",
+  "description": "one line detail about this task"
+}
+
+Rules:
+- If a specific time is mentioned, use it exactly
+- If only a deadline is mentioned (e.g. "due Friday"), schedule it for 9:00-10:00 AM that day
+- If "tonight" is mentioned, use today's date
+- If "tomorrow" is mentioned, use tomorrow's date
+- Assume current year is 2026
+- Only extract tasks that have a clear time or date — skip vague ones
+- Return empty array [] if no time-based events found
+- Maximum 10 events
+"""
+
+
+# ─── NEW: Week planner instruction ────────────────────────────────────────────
+WEEK_PLANNER_INSTRUCTION = """
+You are DeadlineAI — the same calm, brilliant best friend — but now you're building a FULL WEEK PLAN.
+
+The user has given you their tasks. Build a complete 7-day schedule starting from today.
+
+Format:
+📅 MONDAY [date]
+  🕐 [Time] → [Task] (~[duration])
+  🕐 [Time] → [Task] (~[duration])
+  
+📅 TUESDAY [date]
+  🕐 [Time] → [Task] (~[duration])
+  ...
+
+[Repeat for each day of the week]
+
+💬 [One closing line — real friend energy, not motivational poster]
+
+Rules:
+- Spread tasks realistically across the week — don't pile everything on day 1
+- Include study/work blocks, breaks, and sleep protection
+- Mark urgent tasks on the earliest appropriate day
+- Leave some breathing room — don't schedule every minute
+- If a task has a specific deadline, schedule it before that deadline
+- Keep it scannable — one line per time block
+- Assume a typical student/professional schedule (wake ~8am, sleep ~12am)
+- Today is """ + __import__('datetime').date.today().strftime('%A, %B %d, %Y')
+
+
 def login_required(view_func):
     @wraps(view_func)
     def wrapped(*args, **kwargs):
@@ -124,6 +185,8 @@ def login_required(view_func):
         return view_func(*args, **kwargs)
     return wrapped
 
+
+# ─── Auth routes (unchanged) ──────────────────────────────────────────────────
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -154,6 +217,8 @@ def home():
 def current_session():
     return jsonify({"logged_in": bool(session.get("user")), "user": session.get("user")})
 
+
+# ─── Original routes (unchanged) ──────────────────────────────────────────────
 
 @app.route("/api/plan", methods=["POST"])
 @login_required
@@ -209,6 +274,75 @@ Briefly acknowledge what changed, then give the updated plan with the same warm,
                 system_instruction=SYSTEM_INSTRUCTION,
                 temperature=0.5,
                 max_output_tokens=1200,
+            ),
+        )
+        return jsonify({"plan": response.text})
+
+    except Exception as exc:
+        return jsonify({"error": f"Something went wrong: {str(exc)}"}), 500
+
+
+# ─── NEW: Calendar export endpoint ────────────────────────────────────────────
+
+@app.route("/api/calendar", methods=["POST"])
+@login_required
+def extract_calendar():
+    """
+    Takes a plan text, asks Gemini to extract calendar events as JSON,
+    returns structured event list for .ics generation on the frontend.
+    """
+    data = request.get_json(silent=True) or {}
+    plan_text = data.get("plan", "").strip()
+
+    if not plan_text:
+        return jsonify({"error": "No plan provided."}), 400
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=f"Extract calendar events from this plan:\n\n{plan_text}",
+            config=types.GenerateContentConfig(
+                system_instruction=CALENDAR_INSTRUCTION,
+                temperature=0.1,  # very low — we want consistent JSON
+                max_output_tokens=1000,
+            ),
+        )
+
+        raw = response.text.strip()
+        # Clean markdown fences if model adds them
+        raw = raw.replace("```json", "").replace("```", "").strip()
+
+        events = json.loads(raw)
+        return jsonify({"events": events})
+
+    except json.JSONDecodeError:
+        return jsonify({"error": "Could not extract events. Try again.", "raw": response.text}), 500
+    except Exception as exc:
+        return jsonify({"error": f"Something went wrong: {str(exc)}"}), 500
+
+
+# ─── NEW: Week planner endpoint ───────────────────────────────────────────────
+
+@app.route("/api/weekplan", methods=["POST"])
+@login_required
+def week_plan():
+    """
+    Takes user's task description, generates a full 7-day schedule.
+    """
+    data = request.get_json(silent=True) or {}
+    user_input = data.get("input", "").strip()
+
+    if not user_input:
+        return jsonify({"error": "Please describe your tasks first."}), 400
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=f"Build me a full week plan for these tasks:\n\n{user_input}",
+            config=types.GenerateContentConfig(
+                system_instruction=WEEK_PLANNER_INSTRUCTION,
+                temperature=0.4,
+                max_output_tokens=1500,
             ),
         )
         return jsonify({"plan": response.text})
