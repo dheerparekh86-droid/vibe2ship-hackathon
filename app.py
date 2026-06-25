@@ -13,18 +13,52 @@ from functools import wraps
 from html import escape
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, redirect, render_template, render_template_string, request, session, url_for
+from flask import (
+    Flask,
+    jsonify,
+    redirect,
+    render_template,
+    render_template_string,
+    request,
+    session,
+    url_for,
+    Response,
+)
 from google import genai
 from google.genai import types
 from werkzeug.security import check_password_hash, generate_password_hash
-
+import time  
 load_dotenv()
+print("KEY BEING USED:", os.environ.get("GEMINI_API_KEY", "NOT FOUND")[:12])
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "deadlineai-dev-secret-change-me")
 
-MODEL_NAME = "gemini-2.0-flash"
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+MODEL_NAME = "gemini-2.5-flash-lite"
+# Collect all available keys — supports both single key and rotation
+GEMINI_KEYS = [
+    os.environ.get("GEMINI_API_KEY_1"),
+    os.environ.get("GEMINI_API_KEY_2"),
+    
+    os.environ.get("GEMINI_API_KEY"),  # fallback to old single key
+]
+GEMINI_KEYS = [k for k in GEMINI_KEYS if k]  # remove None/empty
+
+if not GEMINI_KEYS:
+    raise RuntimeError("No Gemini API keys found. Set GEMINI_API_KEY_1 in your .env file.")
+
+print(f"DeadlineAI: {len(GEMINI_KEYS)} API key(s) loaded.")
+_key_index = 0
+
+def get_client():
+    global _key_index
+    return genai.Client(api_key=GEMINI_KEYS[_key_index % len(GEMINI_KEYS)])
+
+def rotate_key():
+    global _key_index
+    _key_index += 1
+    print(f"Rotated to key index {_key_index % len(GEMINI_KEYS)}")
 
 DEMO_USER = os.environ.get("DEADLINEAI_USER", "demo")
 DEMO_PASSWORD_HASH = generate_password_hash(os.environ.get("DEADLINEAI_PASSWORD", "deadline123"))
@@ -151,16 +185,33 @@ def parse_json_object(text):
 
 
 def gemini_text(prompt, temperature=0.4, max_output_tokens=1200, system_instruction=SYSTEM_INSTRUCTION):
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            temperature=temperature,
-            max_output_tokens=max_output_tokens,
-        ),
-    )
-    return response.text or ""
+    global _key_index
+    for attempt in range(len(GEMINI_KEYS) * 2):
+        try:
+            client = get_client()
+            response = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=temperature,
+                    max_output_tokens=max_output_tokens,
+                ),
+            )
+            return response.text or ""
+        except Exception as e:
+            err = str(e)
+            if "429" in err or "RESOURCE_EXHAUSTED" in err:
+                print(f"Key {_key_index % len(GEMINI_KEYS)} exhausted, rotating...")
+                rotate_key()
+                time.sleep(2)
+                continue
+            elif "503" in err or "UNAVAILABLE" in err:  # ← ADD THIS
+                print(f"503 on attempt {attempt}, retrying in 3s...")
+                time.sleep(3)
+                continue
+            raise
+    return "I'm having trouble reaching the AI right now. Please try again in a minute."
 
 
 def gemini_json(prompt, fallback=None):
@@ -356,9 +407,9 @@ def progress_snapshot():
     percent = round((done / total) * 100) if total else 0
     return {"total": total, "done": done, "remaining": remaining, "percent": percent}
 
-
 def save_plan_state(user_input, plan, old_tasks=None):
     tasks = extract_tasks(plan)
+    time.sleep(2)  # avoid RPM burst between chained Gemini calls
     if old_tasks:
         tasks = preserve_completed_tasks(tasks, old_tasks)
     events = extract_calendar_events(plan)
@@ -381,8 +432,8 @@ def save_plan_state(user_input, plan, old_tasks=None):
         "progress": progress_snapshot(),
         "next_checkin_at": session["next_checkin_at"],
         "calendar_url": url_for("calendar_view"),
+        "ics_url": url_for("export_ics") 
     }
-
 
 def build_checkin_message(force=False):
     tasks = session.get("tasks", [])
@@ -585,6 +636,8 @@ User situation:
 """
     try:
         plan = gemini_text(prompt, temperature=0.45, max_output_tokens=1400)
+        if not plan or "trouble reaching" in plan:
+            return jsonify({"error": "Model is busy right now. Try again in 10 seconds."}), 503
         return jsonify(save_plan_state(user_input, plan))
     except Exception as exc:
         return jsonify({"error": f"Something went wrong: {str(exc)}"}), 500
@@ -690,7 +743,42 @@ def calendar_events():
         events = session.get("calendar_events", [])
 
     return jsonify({"events": events, "calendar_url": url_for("calendar_view")})
+# ↑ existing calendar_events() ends here
 
+@app.route("/api/calendar/ics")
+@login_required
+def export_ics():
+    events = session.get("calendar_events", [])
+    lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//DeadlineAI//EN",
+        "CALSCALE:GREGORIAN",
+    ]
+    for i, ev in enumerate(events):
+        uid = f"deadlineai-{i}-{uuid.uuid4()}"
+        dt_stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+        date = ev.get("date", "").replace("-", "")
+        start = ev.get("start_time", "00:00").replace(":", "")
+        end = ev.get("end_time", "00:00").replace(":", "")
+        lines.extend([
+            "BEGIN:VEVENT",
+            f"UID:{uid}",
+            f"DTSTAMP:{dt_stamp}",
+            f"DTSTART:{date}T{start}00",
+            f"DTEND:{date}T{end}00",
+            f"SUMMARY:{ev.get('title', 'Task')}",
+            f"DESCRIPTION:{ev.get('description', '')}",
+            "END:VEVENT",
+        ])
+    lines.append("END:VCALENDAR")
+    return Response(
+        "\r\n".join(lines),
+        mimetype="text/calendar",
+        headers={"Content-Disposition": "attachment; filename=deadlineai.ics"},
+    )
+
+# ↓ existing /health route stays here
 
 @app.route("/health")
 def health():
