@@ -1,5 +1,5 @@
-flask
-python-dotenv
-google-genai
-werkzeug
+Flask
 gunicorn
+google-genai
+python-dotenv
+Werkzeug
