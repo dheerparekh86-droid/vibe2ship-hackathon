@@ -407,11 +407,12 @@ def progress_snapshot():
 
 def save_plan_state(user_input, plan, old_tasks=None):
     tasks = extract_tasks(plan)
-    time.sleep(2)  # avoid RPM burst between chained Gemini calls
+    # REMOVED time.sleep(2)
     if old_tasks:
         tasks = preserve_completed_tasks(tasks, old_tasks)
     events = extract_calendar_events(plan)
     started = now_utc()
+    # ... rest unchanged
 
     session["current_plan"] = plan
     session["current_input"] = user_input
@@ -570,6 +571,8 @@ def current_session():
 
 @app.route("/api/plan", methods=["POST"])
 @login_required
+@app.route("/api/plan", methods=["POST"])
+@login_required
 def generate_plan():
     data = request.get_json(silent=True) or {}
     user_input = data.get("input", "").strip()
@@ -581,10 +584,35 @@ def generate_plan():
 
     try:
         plan = gemini_text(user_input, temperature=0.5, max_output_tokens=1200)
-        return jsonify(save_plan_state(user_input, plan))
+        if not plan or "trouble reaching" in plan:
+            return jsonify({"error": "AI is busy. Try again in 10 seconds."}), 503
+
+        # 1 Gemini call only — tasks extracted locally, calendar on demand
+        tasks = fallback_tasks_from_plan(plan)
+        events = []
+
+        started = now_utc()
+        session["current_plan"] = plan
+        session["current_input"] = user_input
+        session["tasks"] = tasks
+        session["calendar_events"] = events
+        session["plan_started_at"] = started.isoformat()
+        session["last_checkin_at"] = None
+        session["next_checkin_at"] = (started + timedelta(minutes=25)).isoformat()
+        session["completed_summary"] = None
+        session.modified = True
+
+        return jsonify({
+            "plan": plan,
+            "tasks": tasks,
+            "calendar_events": events,
+            "progress": progress_snapshot(),
+            "next_checkin_at": session["next_checkin_at"],
+            "calendar_url": url_for("calendar_view"),
+            "ics_url": url_for("export_ics"),
+        })
     except Exception as exc:
         return jsonify({"error": f"Something went wrong: {str(exc)}"}), 500
-
 
 @app.route("/api/reschedule", methods=["POST"])
 @login_required
@@ -607,10 +635,35 @@ Briefly acknowledge what changed, then give the updated plan with the same warm,
 
     try:
         plan = gemini_text(combined_input, temperature=0.5, max_output_tokens=1200)
+        if not plan or "trouble reaching" in plan:
+            return jsonify({"error": "AI is busy. Try again in 10 seconds."}), 503
+
         old_tasks = session.get("tasks", [])
-        state = save_plan_state(update, plan, old_tasks=old_tasks)
-        state["changed"] = update
-        return jsonify(state)
+        tasks = fallback_tasks_from_plan(plan)
+        tasks = preserve_completed_tasks(tasks, old_tasks)
+        events = []
+
+        started = now_utc()
+        session["current_plan"] = plan
+        session["current_input"] = update
+        session["tasks"] = tasks
+        session["calendar_events"] = events
+        session["plan_started_at"] = started.isoformat()
+        session["last_checkin_at"] = None
+        session["next_checkin_at"] = (started + timedelta(minutes=25)).isoformat()
+        session["completed_summary"] = None
+        session.modified = True
+
+        return jsonify({
+            "plan": plan,
+            "tasks": tasks,
+            "calendar_events": events,
+            "progress": progress_snapshot(),
+            "next_checkin_at": session["next_checkin_at"],
+            "calendar_url": url_for("calendar_view"),
+            "ics_url": url_for("export_ics"),
+            "changed": update,
+        })
     except Exception as exc:
         return jsonify({"error": f"Something went wrong: {str(exc)}"}), 500
 
