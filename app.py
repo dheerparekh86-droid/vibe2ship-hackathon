@@ -151,6 +151,10 @@ Real talk: [task] probably won't happen fully in this time. [Specific damage con
 8. In OVERWHELM MODE - one sentence of empathy, then immediately take control
 9. The schedule must fit the actual time they have, not a perfect-world scenario
 10. Sound like a person, not a tool
+11. Maximum 7 action bullets per task - cut the rest
+12. Never write more than 2 sentences of intro before RIGHT NOW
+13. 
+14. Bold only task names and times, nothing else
 """
 
 
