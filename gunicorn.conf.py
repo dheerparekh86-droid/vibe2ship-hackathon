@@ -1,4 +1,5 @@
 timeout = 120
 workers = 1
 threads = 2
-worker_class = "sync"
+worker_class = "gthread" 
+keepalive = 5
