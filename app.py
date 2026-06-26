@@ -204,16 +204,14 @@ def gemini_text(prompt, temperature=0.4, max_output_tokens=1200, system_instruct
             if "429" in err or "RESOURCE_EXHAUSTED" in err:
                 print(f"Key {_key_index % len(GEMINI_KEYS)} exhausted, rotating...")
                 rotate_key()
-                time.sleep(2)
+                time.sleep(1)  # ← was 2, now 1
                 continue
-            elif "503" in err or "UNAVAILABLE" in err:  # ← ADD THIS
-                print(f"503 on attempt {attempt}, retrying in 3s...")
-                time.sleep(3)
+            elif "503" in err or "UNAVAILABLE" in err:
+                print(f"503 on attempt {attempt}, retrying...")
+                time.sleep(1)  # ← was 3, now 1
                 continue
             raise
     return "I'm having trouble reaching the AI right now. Please try again in a minute."
-
-
 def gemini_json(prompt, fallback=None):
     try:
         raw = gemini_text(
