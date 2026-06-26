@@ -3,7 +3,7 @@ services:
     name: vibe2ship-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+startCommand: gunicorn app:app --config gunicorn.conf.py --timeout 120 --workers 1 --worker-class sync
     envVars:
       - key: GEMINI_API_KEY
         sync: false
