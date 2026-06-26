@@ -40,7 +40,7 @@ MODEL_NAME = "gemini-2.5-flash-lite"
 GEMINI_KEYS = [
     os.environ.get("GEMINI_API_KEY_1"),
     os.environ.get("GEMINI_API_KEY_2"),
-    
+     os.environ.get("GEMINI_API_KEY_3"),
     os.environ.get("GEMINI_API_KEY"),  # fallback to old single key
 ]
 GEMINI_KEYS = [k for k in GEMINI_KEYS if k]  # remove None/empty
@@ -569,8 +569,7 @@ def current_session():
     return jsonify({"logged_in": bool(session.get("user")), "user": session.get("user")})
 
 
-@app.route("/api/plan", methods=["POST"])
-@login_required
+
 @app.route("/api/plan", methods=["POST"])
 @login_required
 def generate_plan():
