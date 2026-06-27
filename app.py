@@ -602,6 +602,7 @@ def current_session():
 
 @app.route("/api/plan", methods=["POST"])
 @login_required
+
 def generate_plan():
     data = request.get_json(silent=True) or {}
     user_input = data.get("input", "").strip()
@@ -613,13 +614,14 @@ def generate_plan():
 
     try:
         plan = gemini_text(user_input, temperature=0.5, max_output_tokens=1200)
-        new_plan = Plan(user=session["user"], input_text=user_input, plan_text=plan)
-        db.session.add(new_plan)
-        db.session.commit()
+
         if not plan or "trouble reaching" in plan:
             return jsonify({"error": "AI is busy. Try again in 10 seconds."}), 503
 
-        # 1 Gemini call only — tasks extracted locally, calendar on demand
+        new_plan = Plan(user=session["user"], input_text=user_input, plan_text=plan)
+        db.session.add(new_plan)
+        db.session.commit()
+
         tasks = fallback_tasks_from_plan(plan)
         events = []
 
@@ -645,7 +647,6 @@ def generate_plan():
         })
     except Exception as exc:
         return jsonify({"error": f"Something went wrong: {str(exc)}"}), 500
-
 @app.route("/api/reschedule", methods=["POST"])
 @login_required
 def reschedule():
