@@ -1,1 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeadlineAI - Calendar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0B0B0F;color:#fff;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+    .main{margin-left:220px;flex:1;padding:32px;min-height:100vh}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+    .topbar h1{font-size:24px;font-weight:700}
+    .topbar-right{display:flex;gap:10px}
+    .btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s}
+    .btn-orange{background:#FF7A1A;color:#fff}
+    .btn-ghost{background:#15161A;color:#888;border:1px solid #1e1e2a}
+    .btn-ghost:hover{border-color:#FF7A1A;color:#FF7A1A}
+    .week-nav{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:24px}
+    .day-pill{padding:12px 8px;background:#15161A;border:1px solid #1e1e2a;border-radius:10px;text-align:center;cursor:pointer;transition:all 0.15s}
+    .day-pill.today{background:#1a0f00;border-color:#FF7A1A}
+    .day-pill .day-name{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+    .day-pill .day-num{font-size:18px;font-weight:700;color:#fff}
+    .day-pill.today .day-num{color:#FF7A1A}
+    .day-pill .dot{width:4px;height:4px;background:#FF7A1A;border-radius:50%;margin:4px auto 0}
+    .events-list{display:flex;flex-direction:column;gap:10px}
+    .event-card{background:#15161A;border:1px solid #1e1e2a;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px;transition:all 0.15s}
+    .event-card:hover{border-color:#2a2a3a}
+    .event-time{color:#FF7A1A;font-size:13px;font-weight:600;min-width:100px}
+    .event-bar{width:3px;height:40px;border-radius:2px;flex-shrink:0}
+    .event-info .event-title{font-size:14px;font-weight:500;color:#fff;margin-bottom:4px}
+    .event-info .event-desc{font-size:12px;color:#555}
+    .event-tag{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:#1a0f00;color:#FF7A1A}
+    .empty-state{text-align:center;padding:60px;color:#444}
+    .empty-state .icon{font-size:48px;margin-bottom:16px}
+    .ai-notice{background:#1a0f00;border:1px solid #2a1500;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .ai-notice p{font-size:13px;color:#ccc}
+    .ai-notice p strong{color:#FF7A1A}
+  </style>
+</head>
+<body>
+{% include 'sidebar.html' %}
+<main class="main">
+  <div class="topbar">
+    <h1>📅 Calendar</h1>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="exportICS()">⬇ Download .ics</button>
+      <button class="btn btn-orange" onclick="extractEvents()">✨ Extract from Plan</button>
+    </div>
+  </div>
 
+  <div class="week-nav" id="week-nav"></div>
+
+  <div id="ai-notice" style="display:none" class="ai-notice">
+    <p>⚡ <strong>AI detected schedule blocks</strong> from your last plan. Showing them below.</p>
+    <button class="btn btn-ghost" style="padding:6px 14px;font-size:12px" onclick="document.getElementById('ai-notice').style.display='none'">Dismiss</button>
+  </div>
+
+  <div class="events-list" id="events-list">
+    <div class="empty-state">
+      <div class="icon">📅</div>
+      <p>No events yet. Build a plan then click "Extract from Plan" to populate your calendar.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+const COLORS = ['#FF7A1A','#22c9e0','#1D9E75','#E24B4A','#6b5fa0','#a87220'];
+
+function buildWeekNav() {
+  const nav = document.getElementById('week-nav');
+  const today = new Date();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  for (let i = -3; i <= 3; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const isToday = i === 0;
+    nav.innerHTML += `
+      <div class="day-pill ${isToday ? 'today' : ''}">
+        <div class="day-name">${days[d.getDay()]}</div>
+        <div class="day-num">${d.getDate()}</div>
+        ${isToday ? '<div class="dot"></div>' : ''}
+      </div>`;
+  }
+}
+
+async function loadEvents() {
+  try {
+    const r = await fetch('/api/calendar');
+    const d = await r.json();
+    renderEvents(d.events || []);
+  } catch(e) {}
+}
+
+function renderEvents(events) {
+  const list = document.getElementById('events-list');
+  if (!events.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📅</div><p>No events yet. Build a plan then click "Extract from Plan".</p></div>`;
+    return;
+  }
+  document.getElementById('ai-notice').style.display = 'flex';
+  list.innerHTML = events.map((ev, i) => `
+    <div class="event-card">
+      <div class="event-time">${escHtml(ev.start_time || '')} - ${escHtml(ev.end_time || '')}</div>
+      <div class="event-bar" style="background:${COLORS[i % COLORS.length]}"></div>
+      <div class="event-info" style="flex:1">
+        <div class="event-title">${escHtml(ev.title || 'Task')}</div>
+        <div class="event-desc">${escHtml(ev.date || '')} ${ev.description ? '· ' + escHtml(ev.description) : ''}</div>
+      </div>
+      <span class="event-tag">Task</span>
+    </div>`).join('');
+}
+
+async function extractEvents() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Extracting...';
+  try {
+    const r = await fetch('/api/calendar', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    });
+    const d = await r.json();
+    renderEvents(d.events || []);
+  } catch(e) {
+    alert('Could not extract events. Build a plan first.');
+  }
+  btn.disabled = false;
+  btn.textContent = '✨ Extract from Plan';
+}
+
+async function exportICS() {
+  window.location.href = '/api/calendar/ics';
+}
+
+function escHtml(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+buildWeekNav();
+loadEvents();
+</script>
+</body>
+</html>
