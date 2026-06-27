@@ -887,7 +887,25 @@ def analytics():
             for p in recent_plans
         ]
     })
+@app.route("/tasks")
+@login_required
+def tasks_page():
+    return render_template("tasks.html", username=session["user"])
 
+@app.route("/assistant")
+@login_required
+def assistant_page():
+    return render_template("assistant.html", username=session["user"])
+
+@app.route("/calendar-view")
+@login_required
+def calendar_page():
+    return render_template("calendar_page.html", username=session["user"])
+
+@app.route("/analytics")
+@login_required
+def analytics_page():
+    return render_template("analytics_page.html", username=session["user"])
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
