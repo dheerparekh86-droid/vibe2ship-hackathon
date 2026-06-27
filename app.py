@@ -535,10 +535,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/")
-@login_required
-def home():
-    return render_template("index.html", username=session["user"])
+
 
 
 @app.route("/calendar")
@@ -600,9 +597,9 @@ def current_session():
 
 
 
+# CORRECT:
 @app.route("/api/plan", methods=["POST"])
 @login_required
-
 def generate_plan():
     data = request.get_json(silent=True) or {}
     user_input = data.get("input", "").strip()
@@ -887,25 +884,32 @@ def analytics():
             for p in recent_plans
         ]
     })
+# CHANGE THESE 5 ROUTES:
+
+@app.route("/")
+@login_required
+def home():
+    return render_template("index.html", username=session["user"], page="dashboard")
+
 @app.route("/tasks")
 @login_required
 def tasks_page():
-    return render_template("tasks.html", username=session["user"])
+    return render_template("tasks.html", username=session["user"], page="tasks")
 
 @app.route("/assistant")
 @login_required
 def assistant_page():
-    return render_template("assistant.html", username=session["user"])
+    return render_template("assistant.html", username=session["user"], page="assistant")
 
 @app.route("/calendar-view")
 @login_required
 def calendar_page():
-    return render_template("calendar_page.html", username=session["user"])
+    return render_template("calendar_page.html", username=session["user"], page="calendar")
 
 @app.route("/analytics")
 @login_required
 def analytics_page():
-    return render_template("analytics_page.html", username=session["user"])
+    return render_template("analytics_page.html", username=session["user"], page="analytics")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
