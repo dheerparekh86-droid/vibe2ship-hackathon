@@ -41,17 +41,24 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_guest = db.Column(db.Boolean, default=False)
 
 class Plan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user = db.Column(db.String(80), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     input_text = db.Column(db.Text)
     plan_text = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Task(db.Model):
     id = db.Column(db.String(20), primary_key=True)
-    user = db.Column(db.String(80), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     plan_id = db.Column(db.Integer, db.ForeignKey("plan.id"))
     title = db.Column(db.String(200))
     completed = db.Column(db.Boolean, default=False)
@@ -86,8 +93,6 @@ def rotate_key():
     _key_index += 1
     print(f"Rotated to key index {_key_index % len(GEMINI_KEYS)}")
 
-DEMO_USER = os.environ.get("DEADLINEAI_USER", "demo")
-DEMO_PASSWORD_HASH = generate_password_hash(os.environ.get("DEADLINEAI_PASSWORD", "deadline123"))
 
 
 SYSTEM_INSTRUCTION = """
@@ -186,12 +191,11 @@ Real talk: [task] probably won't happen fully in this time. [Specific damage con
 def login_required(view_func):
     @wraps(view_func)
     def wrapped(*args, **kwargs):
-        if not session.get("user"):
+        if not session.get("user_id"):
             if request.path.startswith("/api/"):
                 return jsonify({"error": "Please log in first."}), 401
             return redirect(url_for("login"))
         return view_func(*args, **kwargs)
-
     return wrapped
 
 
@@ -518,22 +522,75 @@ Mention what got done and one sane next step. Keep it under 120 words.
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if session.get("user_id"):
+        return redirect(url_for("home"))
+    error = None
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        user = User.query.filter_by(email=email).first()
+        if user and not user.is_guest and check_password_hash(user.password_hash, password):
+            session["user_id"] = user.id
+            session["username"] = user.username
+            return redirect(url_for("home"))
+        error = "Wrong email or password."
+    return render_template("login.html", error=error)
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if session.get("user_id"):
+        return redirect(url_for("home"))
     error = None
     if request.method == "POST":
         username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-        if username == DEMO_USER and check_password_hash(DEMO_PASSWORD_HASH, password):
-            session["user"] = username
+        if not username or not email or not password:
+            error = "All fields are required."
+        elif len(password) < 6:
+            error = "Password must be at least 6 characters."
+        elif User.query.filter_by(email=email).first():
+            error = "An account with that email already exists."
+        elif User.query.filter_by(username=username).first():
+            error = "That username is taken."
+        else:
+            user = User(
+                username=username,
+                email=email,
+                password_hash=generate_password_hash(password)
+            )
+            db.session.add(user)
+            db.session.commit()
+            session["user_id"] = user.id
+            session["username"] = user.username
             return redirect(url_for("home"))
-        error = "Wrong username or password. Check the demo credentials below."
-    return render_template("login.html", error=error, demo_user=DEMO_USER)
-
-
+    return render_template("register.html", error=error)
+@app.route("/guest-login")
+def guest_login():
+    guest_name = f"guest_{uuid.uuid4().hex[:6]}"
+    user = User(
+        username=guest_name,
+        email=f"{guest_name}@guest.deadlineai",
+        password_hash=generate_password_hash(uuid.uuid4().hex),
+        is_guest=True
+    )
+    db.session.add(user)
+    db.session.commit()
+    session["user_id"] = user.id
+    session["username"] = user.username
+    return redirect(url_for("home"))
 @app.route("/logout")
 def logout():
+    user_id = session.get("user_id")
+    if user_id:
+        user = User.query.get(user_id)
+        if user and user.is_guest:
+            # Clean up guest data
+            Plan.query.filter_by(user_id=user_id).delete()
+            Task.query.filter_by(user_id=user_id).delete()
+            db.session.delete(user)
+            db.session.commit()
     session.clear()
     return redirect(url_for("login"))
-
 
 
 
@@ -593,7 +650,7 @@ def calendar_view():
 
 @app.route("/api/session")
 def current_session():
-    return jsonify({"logged_in": bool(session.get("user")), "user": session.get("user")})
+    return jsonify({"logged_in": bool(session.get("user_id")), "user": session.get("username")})
 
 
 
@@ -615,7 +672,7 @@ def generate_plan():
         if not plan or "trouble reaching" in plan:
             return jsonify({"error": "AI is busy. Try again in 10 seconds."}), 503
 
-        new_plan = Plan(user=session["user"], input_text=user_input, plan_text=plan)
+        new_plan = Plan(user=session["user_id"], input_text=user_input, plan_text=plan)
         db.session.add(new_plan)
         db.session.commit()
 
@@ -867,12 +924,11 @@ def health():
 @app.route("/api/analytics")
 @login_required
 def analytics():
-    user = session["user"]
-    total_plans = Plan.query.filter_by(user=user).count()
-    total_tasks = Task.query.filter_by(user=user).count()
-    completed_tasks = Task.query.filter_by(user=user, completed=True).count()
-    recent_plans = Plan.query.filter_by(user=user)\
-        .order_by(Plan.created_at.desc()).limit(5).all()
+    uid = session["user_id"]
+    total_plans = Plan.query.filter_by(user_id=uid).count()
+    total_tasks = Task.query.filter_by(user_id=uid).count()
+    completed_tasks = Task.query.filter_by(user_id=uid, completed=True).count()
+    recent_plans = Plan.query.filter_by(user_id=uid).order_by(Plan.created_at.desc()).limit(5).all()
     
     return jsonify({
         "total_plans": total_plans,
@@ -889,27 +945,27 @@ def analytics():
 @app.route("/")
 @login_required
 def home():
-    return render_template("index.html", username=session["user"], page="dashboard")
+    return render_template("index.html", username=session.get("username", ""), page="dashboard")
 
 @app.route("/tasks")
 @login_required
 def tasks_page():
-    return render_template("tasks.html", username=session["user"], page="tasks")
+    return render_template("tasks.html", username=session.get("username", ""), page="tasks")
 
 @app.route("/assistant")
 @login_required
 def assistant_page():
-    return render_template("assistant.html", username=session["user"], page="assistant")
+    return render_template("assistant.html", username=session.get("username", ""), page="assistant")
 
 @app.route("/calendar-view")
 @login_required
 def calendar_page():
-    return render_template("calendar_page.html", username=session["user"], page="calendar")
+    return render_template("calendar_page.html", username=session.get("username", ""), page="calendar")
 
 @app.route("/analytics")
 @login_required
 def analytics_page():
-    return render_template("analytics_page.html", username=session["user"], page="analytics")
+    return render_template("analytics_page.html", username=session.get("username", ""), page="analytics")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
