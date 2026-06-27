@@ -1,0 +1,1554 @@
+ animation:pulse-rec 1.2s ease-in-out infinite; }
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeadlineAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+            *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+         :root {
+            --ink: #141f13;
+            --ink2: #4d5e4e;
+            --ink3: #859084;
+            --sage: #2d7055;
+            --sage-dark: #1b4f3a;
+            --aqua: #3d8fa0;
+            --coral: #c96248;
+            --amber: #a87220;
+            --blue: #3a5ea8;
+            --lav: #6b5fa0;
+            --glass-white: rgba(255, 255, 255, 0.52);
+            --glass-border: rgba(255, 255, 255, 0.72);
+            --glass-border-subtle: rgba(255, 255, 255, 0.45);
+            --line: rgba(35, 52, 38, 0.12);
+            --shadow: 0 24px 64px rgba(30, 55, 38, 0.14);
+            --shadow-sm: 0 8px 28px rgba(30, 55, 38, 0.10);
+            --glow-sage: 0 0 40px rgba(45, 112, 85, 0.18);
+        }
+        
+        html {
+            scroll-behavior: smooth
+        }
+        
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--ink);
+            background: linear-gradient(145deg, #e8f4ee 0%, #f5f0e5 35%, #fceee6 65%, #e5f0f2 100%);
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(72px);
+            pointer-events: none;
+            z-index: 0;
+            animation: drift 18s ease-in-out infinite
+        }
+        
+        .blob-1 {
+            width: 600px;
+            height: 600px;
+            top: -180px;
+            left: -140px;
+            background: radial-gradient(circle, rgba(61, 143, 160, 0.28) 0%, transparent 65%);
+            animation-delay: 0s
+        }
+        
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            top: -80px;
+            right: -120px;
+            background: radial-gradient(circle, rgba(201, 98, 72, 0.22) 0%, transparent 65%);
+            animation-delay: -6s
+        }
+        
+        .blob-3 {
+            width: 550px;
+            height: 550px;
+            bottom: -160px;
+            left: 30%;
+            background: radial-gradient(circle, rgba(45, 112, 85, 0.20) 0%, transparent 65%);
+            animation-delay: -12s
+        }
+        
+        .blob-4 {
+            width: 380px;
+            height: 380px;
+            bottom: 10%;
+            right: -80px;
+            background: radial-gradient(circle, rgba(168, 114, 32, 0.14) 0%, transparent 65%);
+            animation-delay: -4s
+        }
+        
+        @keyframes drift {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1)
+            }
+            33% {
+                transform: translate(24px, -18px) scale(1.04)
+            }
+            66% {
+                transform: translate(-16px, 22px) scale(0.97)
+            }
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image: linear-gradient(rgba(35, 52, 38, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(35, 52, 38, 0.025) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.55) 0%, transparent 60%)
+        }
+        
+        .glass {
+            background: var(--glass-white);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            border-radius: 28px;
+            box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.8)
+        }
+        
+        .glass-sm {
+            background: rgba(255, 255, 255, 0.42);
+            border: 1px solid var(--glass-border-subtle);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 18px;
+            box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.7)
+        }
+        
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 68px;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(240, 248, 244, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5), 0 2px 20px rgba(30, 55, 38, 0.06)
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            text-decoration: none;
+            color: var(--ink);
+            font: 800 18px 'Sora', sans-serif;
+            letter-spacing: -0.01em
+        }
+        
+        .mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(140deg, var(--sage-dark), var(--aqua));
+            box-shadow: 0 10px 24px rgba(27, 79, 58, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.2)
+        }
+        
+        .mark svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+        
+        .userbar {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+        
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 34px;
+            padding: 0 14px;
+            background: rgba(255, 255, 255, 0.58);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 999px;
+            color: var(--ink2);
+            font: 700 12px 'Inter', sans-serif;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(30, 55, 38, 0.07)
+        }
+        
+        .pill-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--sage);
+            box-shadow: 0 0 0 4px rgba(45, 112, 85, 0.16)
+        }
+        
+        .logout {
+            color: var(--ink2);
+            text-decoration: none;
+            font: 700 13px 'Inter', sans-serif;
+            opacity: 0.75;
+            transition: opacity 0.15s
+        }
+        
+        .logout:hover {
+            opacity: 1
+        }
+        
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px
+        }
+        
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 22px;
+            align-items: start
+        }
+        
+        h1 {
+            font: 800 clamp(38px, 6vw, 72px)/0.96 'Sora', sans-serif;
+            letter-spacing: -0.045em;
+            max-width: 700px;
+            margin-bottom: 18px
+        }
+        
+        h1 .grad {
+            background: linear-gradient(115deg, var(--sage-dark) 0%, var(--aqua) 45%, var(--coral) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent
+        }
+        
+        .hero-sub {
+            font-size: 17px;
+            line-height: 1.75;
+            color: var(--ink2);
+            max-width: 560px
+        }
+        
+        .pulse-card {
+            padding: 22px
+        }
+        
+        .pulse-title {
+            font: 700 13px 'Sora', sans-serif;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--ink);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 9px
+        }
+        
+        .pulse-title-line {
+            width: 22px;
+            height: 2px;
+            border-radius: 1px;
+            background: linear-gradient(90deg, var(--sage), var(--aqua))
+        }
+        
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 11px
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--ink2)
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: var(--sage);
+            box-shadow: 0 0 0 5px rgba(45, 112, 85, 0.14)
+        }
+        
+        .app-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 22px
+        }
+        
+        .composer {
+            overflow: hidden
+        }
+        
+        .composer-bar {
+            height: 5px;
+            background: linear-gradient(90deg, var(--sage-dark), var(--aqua) 50%, var(--coral))
+        }
+        
+        .compose-inner {
+            padding: 28px
+        }
+        
+        .row-between {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px
+        }
+        
+        label {
+            font: 700 15px 'Sora', sans-serif;
+            color: var(--ink)
+        }
+        
+        .counter {
+            font: 600 12px 'Inter';
+            color: var(--ink3);
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 999px;
+            padding: 3px 10px;
+            backdrop-filter: blur(8px)
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 190px;
+            resize: vertical;
+            margin-top: 14px;
+            background: rgba(255, 255, 255, 0.58);
+            border: 1px solid rgba(255, 255, 255, 0.78);
+            border-radius: 20px;
+            padding: 18px 20px;
+            color: var(--ink);
+            font: 500 15px/1.75 'Inter', system-ui, sans-serif;
+            outline: none;
+            backdrop-filter: blur(10px);
+            box-shadow: inset 0 2px 8px rgba(30, 55, 38, 0.04);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s
+        }
+        
+        textarea:focus {
+            border-color: rgba(45, 112, 85, 0.5);
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: 0 0 0 4px rgba(45, 112, 85, 0.12), inset 0 2px 8px rgba(30, 55, 38, 0.03)
+        }
+        
+        textarea::placeholder {
+            color: var(--ink3)
+        }
+        
+        .micro-label {
+            font: 700 11px 'Inter';
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--ink3);
+            margin: 18px 0 10px
+        }
+        
+        .moods,
+        .samples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+        
+        .mood,
+        .sample {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 34px;
+            padding: 0 14px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 999px;
+            color: var(--ink2);
+            font: 700 12px 'Inter', sans-serif;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 8px rgba(30, 55, 38, 0.06);
+            transition: transform 0.15s, background 0.15s, border-color 0.15s, box-shadow 0.15s
+        }
+        
+        .mood:hover,
+        .sample:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.78);
+            border-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 6px 18px rgba(30, 55, 38, 0.10)
+        }
+        
+        .mood.active {
+            background: rgba(45, 112, 85, 0.14);
+            border-color: rgba(45, 112, 85, 0.38);
+            color: var(--sage-dark);
+            box-shadow: 0 0 0 3px rgba(45, 112, 85, 0.10)
+        }
+        
+        .mood-pip {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%
+        }
+        
+        .progress {
+            height: 3px;
+            margin-top: 18px;
+            background: rgba(35, 52, 38, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.2s
+        }
+        
+        .progress.active {
+            opacity: 1
+        }
+        
+        .progress-fill {
+            height: 100%;
+            width: 42%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--sage), var(--aqua), var(--coral));
+            animation: slide 1.3s ease-in-out infinite
+        }
+        
+        @keyframes slide {
+            from {
+                transform: translateX(-120%)
+            }
+            to {
+                transform: translateX(280%)
+            }
+        }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            margin-top: 18px
+        }
+        
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 52px;
+            border: none;
+            border-radius: 17px;
+            background: linear-gradient(135deg, var(--sage-dark), #2d7055);
+            color: #fff;
+            font: 700 14px 'Inter', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 16px 36px rgba(27, 79, 58, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            transition: transform 0.16s, box-shadow 0.16s
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 44px rgba(27, 79, 58, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.18)
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0)
+        }
+        
+        .btn-primary:disabled {
+            background: rgba(200, 210, 204, 0.7);
+            color: rgba(100, 120, 105, 0.6);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none
+        }
+        
+        .btn-primary svg,
+        .btn-ghost svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+        
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 52px;
+            min-width: 110px;
+            background: rgba(255, 255, 255, 0.52);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 17px;
+            color: var(--ink2);
+            font: 700 13px 'Inter', sans-serif;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 14px rgba(30, 55, 38, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+            transition: transform 0.14s, background 0.14s, box-shadow 0.14s
+        }
+        
+        .btn-ghost:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: 0 8px 22px rgba(30, 55, 38, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.9)
+        }
+        /* ── NEW: Voice button ── */
+        
+        .btn-voice {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 44px;
+            padding: 0 18px;
+            background: rgba(255, 255, 255, 0.52);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 14px;
+            color: var(--ink2);
+            font: 700 12px 'Inter', sans-serif;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 14px rgba(30, 55, 38, 0.07);
+            transition: all 0.15s;
+        }
+        
+        .btn-voice:hover {
+            background: rgba(255, 255, 255, 0.78);
+            transform: translateY(-1px)
+        }
+        
+        .btn-voice.recording {
+            background: rgba(201, 98, 72, 0.14);
+            border-color: rgba(201, 98, 72, 0.4);
+            color: var(--coral);
+            @keyframes pulse-rec {
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 rgba(201, 98, 72, 0.3)
+                }
+                50% {
+                    box-shadow: 0 0 0 6px rgba(201, 98, 72, 0)
+                }
+            }
+            .btn-voice svg {
+                width: 16px;
+                height: 16px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2.3;
+                stroke-linecap: round;
+                stroke-linejoin: round
+            }
+            /* ── NEW: Feature action row ── */
+            .feature-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 14px;
+                padding-top: 14px;
+                border-top: 1px solid rgba(255, 255, 255, 0.5);
+            }
+            .btn-feature {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                height: 38px;
+                padding: 0 16px;
+                background: rgba(255, 255, 255, 0.48);
+                border: 1px solid rgba(255, 255, 255, 0.72);
+                border-radius: 12px;
+                color: var(--ink2);
+                font: 700 12px 'Inter', sans-serif;
+                cursor: pointer;
+                backdrop-filter: blur(8px);
+                transition: all 0.15s;
+            }
+            .btn-feature:hover {
+                background: rgba(255, 255, 255, 0.78);
+                transform: translateY(-1px);
+                box-shadow: 0 6px 18px rgba(30, 55, 38, 0.10)
+            }
+            .btn-feature:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+                transform: none
+            }
+            .btn-feature svg {
+                width: 14px;
+                height: 14px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2.3;
+                stroke-linecap: round;
+                stroke-linejoin: round
+            }
+            .btn-cal {
+                background: rgba(58, 94, 168, 0.1);
+                border-color: rgba(58, 94, 168, 0.3);
+                color: var(--blue)
+            }
+            .btn-cal:hover {
+                background: rgba(58, 94, 168, 0.18)
+            }
+            .btn-speak {
+                background: rgba(107, 95, 160, 0.1);
+                border-color: rgba(107, 95, 160, 0.3);
+                color: var(--lav)
+            }
+            .btn-speak:hover {
+                background: rgba(107, 95, 160, 0.18)
+            }
+            .btn-week {
+                background: rgba(45, 112, 85, 0.1);
+                border-color: rgba(45, 112, 85, 0.3);
+                color: var(--sage-dark)
+            }
+            .btn-week:hover {
+                background: rgba(45, 112, 85, 0.18)
+            }
+            .output {
+                display: none;
+                margin-top: 20px;
+                padding: 26px
+            }
+            .output.visible {
+                display: block;
+                animation: rise 0.32s ease
+            }
+            @keyframes rise {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px)
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0)
+                }
+            }
+            .plan-head {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14px;
+                padding-bottom: 18px;
+                margin-bottom: 18px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.55)
+            }
+            .plan-title {
+                display: flex;
+                align-items: center;
+                gap: 11px;
+                font: 700 12px 'Inter';
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--ink)
+            }
+            .plan-icon {
+                width: 34px;
+                height: 34px;
+                border-radius: 11px;
+                background: rgba(45, 112, 85, 0.14);
+                border: 1px solid rgba(45, 112, 85, 0.22);
+                display: grid;
+                place-items: center;
+                color: var(--sage-dark)
+            }
+            .plan-icon svg {
+                width: 17px;
+                height: 17px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2.5;
+                stroke-linecap: round;
+                stroke-linejoin: round
+            }
+            /* plan output actions row */
+            .plan-actions {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 16px
+            }
+            .plan-text {
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.48);
+                border: 1px solid rgba(255, 255, 255, 0.72);
+                border-radius: 20px;
+                backdrop-filter: blur(12px);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                font-size: 14.5px;
+                line-height: 1.9;
+                color: var(--ink);
+                white-space: pre-wrap;
+                word-break: break-word
+            }
+            .ln {
+                display: block
+            }
+            .ln-rescue {
+                color: var(--coral);
+                font-weight: 700
+            }
+            .ln-crit {
+                color: #c04438;
+                font-weight: 700
+            }
+            .ln-imp {
+                color: var(--amber);
+                font-weight: 600
+            }
+            .ln-wait {
+                color: var(--sage-dark)
+            }
+            .ln-sched {
+                color: var(--blue)
+            }
+            .ln-mot {
+                color: var(--lav);
+                font-style: italic
+            }
+            .revise {
+                margin-top: 20px;
+                padding-top: 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.5);
+                display: none
+            }
+            .revise.visible {
+                display: block
+            }
+            .revise label {
+                display: block;
+                margin-bottom: 12px
+            }
+            .revise textarea {
+                min-height: 88px
+            }
+            .side {
+                display: flex;
+                flex-direction: column;
+                gap: 16px
+            }
+            .side-card {
+                padding: 22px
+            }
+            .side-card h2 {
+                font: 700 14px 'Sora', sans-serif;
+                color: var(--ink);
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                gap: 9px
+            }
+            .side-card-icon {
+                width: 28px;
+                height: 28px;
+                border-radius: 9px;
+                background: rgba(45, 112, 85, 0.12);
+                border: 1px solid rgba(45, 112, 85, 0.18);
+                display: grid;
+                place-items: center;
+                color: var(--sage-dark)
+            }
+            .side-card-icon svg {
+                width: 14px;
+                height: 14px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 2.3;
+                stroke-linecap: round;
+                stroke-linejoin: round
+            }
+            .stats {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px
+            }
+            .stat {
+                padding: 16px;
+                background: rgba(255, 255, 255, 0.46);
+                border: 1px solid rgba(255, 255, 255, 0.7);
+                border-radius: 18px;
+                backdrop-filter: blur(10px);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                transition: transform 0.15s
+            }
+            .stat:hover {
+                transform: translateY(-1px)
+            }
+            .stat b {
+                display: block;
+                font: 800 26px 'Sora', sans-serif;
+                color: var(--ink);
+                line-height: 1;
+                margin-bottom: 4px
+            }
+            .stat span {
+                font: 600 11px 'Inter';
+                color: var(--ink3);
+                text-transform: uppercase;
+                letter-spacing: 0.06em
+            }
+            .history {
+                display: flex;
+                flex-direction: column;
+                gap: 8px
+            }
+            .history button {
+                width: 100%;
+                text-align: left;
+                padding: 11px 14px;
+                background: rgba(255, 255, 255, 0.42);
+                border: 1px solid rgba(255, 255, 255, 0.68);
+                border-radius: 14px;
+                color: var(--ink2);
+                font: 600 12px/1.45 'Inter', sans-serif;
+                cursor: pointer;
+                backdrop-filter: blur(8px);
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+                transition: background 0.14s, border-color 0.14s, transform 0.14s;
+                min-height: auto
+            }
+            .history button:hover {
+                background: rgba(255, 255, 255, 0.68);
+                border-color: rgba(255, 255, 255, 0.88);
+                transform: translateX(3px)
+            }
+            .history-time {
+                font: 700 11px 'Inter';
+                color: var(--sage);
+                display: block;
+                margin-bottom: 2px
+            }
+            .empty {
+                font-size: 13px;
+                line-height: 1.6;
+                color: var(--ink3)
+            }
+            .toast {
+                position: fixed;
+                right: 22px;
+                bottom: 22px;
+                z-index: 200;
+                max-width: 310px;
+                padding: 13px 16px;
+                background: rgba(255, 255, 255, 0.82);
+                border: 1px solid rgba(255, 255, 255, 0.88);
+                border-radius: 16px;
+                box-shadow: 0 12px 36px rgba(30, 55, 38, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(22px);
+                color: var(--ink);
+                font: 600 13px 'Inter';
+                opacity: 0;
+                transform: translateY(14px);
+                pointer-events: none;
+                transition: opacity 0.2s, transform 0.2s
+            }
+            .toast.visible {
+                opacity: 1;
+                transform: translateY(0)
+            }
+            @media(max-width:960px) {
+                .hero,
+                .app-grid {
+                    grid-template-columns: 1fr
+                }
+                .hero {
+                    gap: 16px
+                }
+            }
+            @media(max-width:620px) {
+                header {
+                    padding: 0 16px;
+                    height: 60px
+                }
+                main {
+                    padding: 32px 14px 60px;
+                    gap: 20px
+                }
+                .compose-inner,
+                .output,
+                .side-card,
+                .pulse-card {
+                    padding: 18px
+                }
+                .actions {
+                    grid-template-columns: 1fr
+                }
+                .btn-ghost {
+                    min-width: auto;
+                    width: 100%
+                }
+                h1 {
+                    font-size: 38px
+                }
+                .blob {
+                    filter: blur(90px)
+                }
+            }
+            @keyframes shake {
+                0%,
+                100% {
+                    transform: translateX(0)
+                }
+                25% {
+                    transform: translateX(-5px)
+                }
+                50% {
+                    transform: translateX(5px)
+                }
+                75% {
+                    transform: translateX(-3px)
+                }
+            }
+    </style>
+</head>
+
+<body>
+
+    <div class="blob blob-1" aria-hidden="true"></div>
+    <div class="blob blob-2" aria-hidden="true"></div>
+    <div class="blob blob-3" aria-hidden="true"></div>
+    <div class="blob blob-4" aria-hidden="true"></div>
+
+    <header>
+        <a class="brand" href="/">
+            <span class="mark">
+      <svg viewBox="0 0 18 18"><path d="M3 11.5 6.4 5l3.2 6 2.2-3.8L15 11.5"/><path d="M3 14.5h12"/></svg>
+    </span> DeadlineAI
+        </a>
+        <div class="userbar">
+            <span class="pill"><span class="pill-dot"></span>Signed in as {{ username }}</span>
+            <a class="logout" href="/logout">Logout</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div>
+                <h1>Turn deadline panic into <span class="grad">calm action.</span></h1>
+                <p class="hero-sub">Pick your current state, dump the messy task pile, and get a priority plan you can start immediately.</p>
+            </div>
+            <aside class="glass pulse-card">
+                <div class="pulse-title">
+                    <div class="pulse-title-line"></div>Today in DeadlineAI</div>
+                <div class="status-list">
+                    <div class="status-item"><span class="status-dot"></span>Login protected workspace</div>
+                    <div class="status-item"><span class="status-dot"></span>Voice input + read-aloud support</div>
+                    <div class="status-item"><span class="status-dot"></span>Calendar export + week planner</div>
+                    <div class="status-item"><span class="status-dot"></span>Recent plan history saved in browser</div>
+                </div>
+            </aside>
+        </section>
+
+        <div class="app-grid">
+            <div>
+                <section class="glass composer">
+                    <div class="composer-bar"></div>
+                    <div class="compose-inner">
+
+                        <div class="row-between">
+                            <label for="taskInput">What's happening right now?</label>
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <span class="counter" id="counter">0 chars</span>
+                                <!-- NEW: Voice input button -->
+                                <button class="btn-voice" id="voiceBtn" type="button" onclick="toggleVoice()" title="Speak your tasks">
+                <svg viewBox="0 0 16 16"><rect x="5" y="1" width="6" height="9" rx="3"/><path d="M2 8a6 6 0 0012 0"/><line x1="8" y1="14" x2="8" y2="16"/></svg>
+                <span id="voiceLabel">Speak</span>
+              </button>
+                            </div>
+                        </div>
+
+                        <textarea id="taskInput" placeholder="Example: I have a physics exam tomorrow morning, a coding assignment due Friday, and a form due tonight. It is 10pm and I have not started."></textarea>
+
+                        <div class="micro-label">How are you feeling?</div>
+                        <div class="moods">
+                            <button class="mood" type="button" data-mood="I am panicking and need a rescue plan."><span class="mood-pip" style="background:#c96248"></span>Panicking</button>
+                            <button class="mood" type="button" data-mood="I feel scattered and need priorities."><span class="mood-pip" style="background:#a87220"></span>Scattered</button>
+                            <button class="mood" type="button" data-mood="I am calm but need a sharp schedule."><span class="mood-pip" style="background:#2d7055"></span>Calm</button>
+                            <button class="mood" type="button" data-mood="I feel overwhelmed and need a starting point."><span class="mood-pip" style="background:#6b5fa0"></span>Overwhelmed</button>
+                        </div>
+
+                        <div class="micro-label">Try an example</div>
+                        <div class="samples">
+                            <button class="sample" type="button" onclick="fillExample(0)">🎓 Exam tomorrow</button>
+                            <button class="sample" type="button" onclick="fillExample(1)">💼 Work overload</button>
+                            <button class="sample" type="button" onclick="fillExample(2)">😰 Too many tasks</button>
+                        </div>
+
+                        <div class="progress" id="progress">
+                            <div class="progress-fill"></div>
+                        </div>
+
+                        <div class="actions">
+                            <button class="btn-primary" id="mainBtn" onclick="getPlan()">
+              <svg viewBox="0 0 18 18"><path d="M3 9h12"/><path d="m10 4 5 5-5 5"/></svg>
+              <span id="btnLabel">Build my plan</span>
+            </button>
+                            <button class="btn-ghost" type="button" onclick="clearInput()">Clear</button>
+                        </div>
+
+                        <!-- NEW: Week planner button -->
+                        <div style="margin-top:12px">
+                            <button class="btn-feature btn-week" id="weekBtn" type="button" onclick="getWeekPlan()" style="width:100%;justify-content:center;height:44px">
+              <svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="11" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4"/></svg>
+              📅 Plan My Entire Week
+            </button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- OUTPUT -->
+                <section class="glass output" id="outputBlock">
+                    <div class="plan-head">
+                        <div class="plan-title">
+                            <span class="plan-icon"><svg viewBox="0 0 16 16"><path d="m3 8.5 3 3L13 4"/></svg></span> Your Plan
+                        </div>
+                        <button class="btn-ghost" style="min-height:38px;padding:0 16px;font-size:12px" onclick="copyPlan()">
+            <svg viewBox="0 0 16 16" style="width:15px;height:15px"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M4 11H3a2 2 0 01-2-2V3a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+                    </div>
+
+                    <!-- NEW: Plan action buttons -->
+                    <div class="plan-actions">
+                        <button class="btn-feature btn-speak" id="speakBtn" onclick="speakPlan()" title="Read plan aloud">
+            <svg viewBox="0 0 16 16"><path d="M2 5h4l4-3v12l-4-3H2z"/><path d="M12 5a4 4 0 010 6"/></svg>
+            🔊 Read Aloud
+          </button>
+                        <button class="btn-feature btn-cal" id="calBtn" onclick="exportCalendar()" title="Export to calendar">
+            <svg viewBox="0 0 16 16"><rect x="1" y="3" width="14" height="11" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4"/></svg>
+            📆 Add to Calendar
+          </button>
+                    </div>
+
+                    <div class="plan-text" id="planOut"></div>
+
+                    <div class="revise" id="reviseSection">
+                        <label for="updateInput">Something changed?</label>
+                        <textarea id="updateInput" placeholder="Example: I lost one hour, and the form deadline moved earlier."></textarea>
+                        <div class="actions" style="margin-top:14px">
+                            <button class="btn-primary" onclick="revisePlan()">
+              <svg viewBox="0 0 18 18"><path d="M15 4v5h-5"/><path d="M3 14V9h5"/><path d="M4.4 6.5A6 6 0 0115 9"/><path d="M13.6 11.5A6 6 0 013 9"/></svg>
+              Revise plan
+            </button>
+                            <div></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="side">
+                <section class="glass-sm side-card">
+                    <h2>
+                        <span class="side-card-icon"><svg viewBox="0 0 14 14"><path d="M2 10V6m4 4V2m4 8V5"/></svg></span> Session stats
+                    </h2>
+                    <div class="stats">
+                        <div class="stat"><b id="plansCount">0</b><span>Plans</span></div>
+                        <div class="stat"><b id="wordsCount">0</b><span>Words</span></div>
+                    </div>
+                </section>
+
+                <section class="glass-sm side-card">
+                    <h2>
+                        <span class="side-card-icon"><svg viewBox="0 0 14 14"><path d="M1 7a6 6 0 106-6"/><path d="M1 3v4h4"/></svg></span> Recent plans
+                    </h2>
+                    <div class="history" id="historyList">
+                        <p class="empty">No plans yet. Your latest plans will appear here during this browser session.</p>
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const EXAMPLES = [
+            "I have a physics exam tomorrow at 9am, two coding assignments due Friday, and a college form due by midnight tonight. I have not started any of them. It is 10pm. What do I do?",
+            "I have a client presentation tomorrow at 2pm, three pending pull requests, a sprint review at 11am, and a manager report due by EOD. It is 9am and I do not know what to tackle first.",
+            "I am completely overwhelmed. I have 8 things due this week: two assignments, a lab report, revision for two subjects, a club event, a part-time shift tomorrow, and a friend birthday I forgot."
+        ];
+
+        const input = document.getElementById("taskInput");
+        const counter = document.getElementById("counter");
+        let selectedMood = "",
+            lastInput = "",
+            lastPlan = "";
+        let history = JSON.parse(sessionStorage.getItem("deadlineai_history") || "[]");
+        let isRecording = false,
+            recognition = null,
+            speechSynth = window.speechSynthesis,
+            isSpeaking = false;
+
+        renderHistory();
+        updateStats();
+        input.addEventListener("input", updateStats);
+        document.addEventListener("keydown", e => {
+            if (e.ctrlKey && e.key === "Enter") getPlan()
+        });
+
+        document.querySelectorAll(".mood").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".mood").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                selectedMood = btn.dataset.mood;
+                toast("Mood added to your prompt.");
+            });
+        });
+
+        function fillExample(i) {
+            input.value = EXAMPLES[i];
+            input.focus();
+            updateStats()
+        }
+
+        function clearInput() {
+            input.value = "";
+            input.focus();
+            updateStats()
+        }
+
+        // ── ORIGINAL: Get Plan ──────────────────────────────────────────────────────
+        async function getPlan() {
+            const raw = input.value.trim();
+            if (!raw) {
+                shake(input);
+                toast("Add your tasks first.");
+                return
+            }
+            lastInput = selectedMood ? `${selectedMood}\n\n${raw}` : raw;
+            setLoading(true);
+            try {
+                const r = await fetch("/api/plan", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        input: lastInput
+                    })
+                });
+                const d = await r.json();
+                if (!r.ok || d.error) showError(d.error || "Could not build a plan.");
+                else {
+                    lastPlan = d.plan;
+                    showPlan(d.plan);
+                    saveHistory(raw, d.plan)
+                }
+            } catch {
+                showError("Connection error — please try again.")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        // ── ORIGINAL: Revise Plan ───────────────────────────────────────────────────
+        async function revisePlan() {
+            const u = document.getElementById("updateInput").value.trim();
+            if (!u) {
+                shake(document.getElementById("updateInput"));
+                toast("Tell me what changed first.");
+                return
+            }
+            setLoading(true);
+            try {
+                const r = await fetch("/api/reschedule", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        original_plan: lastPlan || lastInput,
+                        update: u
+                    })
+                });
+                const d = await r.json();
+                if (!r.ok || d.error) showError(d.error || "Could not revise the plan.");
+                else {
+                    lastPlan = d.plan;
+                    showPlan(d.plan);
+                    document.getElementById("updateInput").value = "";
+                    saveHistory("Revision: " + u, d.plan)
+                }
+            } catch {
+                showError("Connection error — please try again.")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        // ── NEW: Week Planner ───────────────────────────────────────────────────────
+        async function getWeekPlan() {
+            const raw = input.value.trim();
+            if (!raw) {
+                shake(input);
+                toast("Add your tasks first.");
+                return
+            }
+            const btn = document.getElementById("weekBtn");
+            btn.disabled = true;
+            btn.textContent = "Planning your week...";
+            setLoading(true);
+            try {
+                const r = await fetch("/api/weekplan", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        input: raw
+                    })
+                });
+                const d = await r.json();
+                if (!r.ok || d.error) showError(d.error || "Could not build week plan.");
+                else {
+                    lastPlan = d.plan;
+                    showPlan(d.plan);
+                    saveHistory("Week plan: " + raw, d.plan);
+                    toast("Your full week plan is ready!")
+                }
+            } catch {
+                showError("Connection error — please try again.")
+            } finally {
+                setLoading(false);
+                btn.disabled = false;
+                btn.innerHTML = '<svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><rect x="1" y="3" width="14" height="11" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4"/></svg> 📅 Plan My Entire Week'
+            }
+        }
+
+        // ── NEW: Voice Input ────────────────────────────────────────────────────────
+        function toggleVoice() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                toast("Voice input not supported in this browser. Try Chrome.");
+                return;
+            }
+            if (isRecording) {
+                stopVoice();
+                return
+            }
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SR();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-IN';
+
+            recognition.onstart = () => {
+                isRecording = true;
+                document.getElementById("voiceBtn").classList.add("recording");
+                document.getElementById("voiceLabel").textContent = "Stop";
+                toast("Listening... speak your tasks.");
+            };
+
+            recognition.onresult = (e) => {
+                let transcript = "";
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    transcript += e.results[i][0].transcript;
+                }
+                input.value = transcript;
+                updateStats();
+            };
+
+            recognition.onerror = (e) => {
+                toast("Voice error: " + e.error);
+                stopVoice();
+            };
+
+            recognition.onend = () => {
+                stopVoice()
+            };
+            recognition.start();
+        }
+
+        function stopVoice() {
+            isRecording = false;
+            if (recognition) recognition.stop();
+            document.getElementById("voiceBtn").classList.remove("recording");
+            document.getElementById("voiceLabel").textContent = "Speak";
+            if (input.value.trim()) toast("Got it! Hit 'Build my plan' when ready.");
+        }
+
+        // ── NEW: Read Aloud ─────────────────────────────────────────────────────────
+        function speakPlan() {
+            if (!lastPlan) {
+                toast("Generate a plan first.");
+                return
+            }
+            if (isSpeaking) {
+                speechSynth.cancel();
+                isSpeaking = false;
+                document.getElementById("speakBtn").innerHTML = '<svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><path d="M2 5h4l4-3v12l-4-3H2z"/><path d="M12 5a4 4 0 010 6"/></svg> 🔊 Read Aloud';
+                toast("Stopped.");
+                return;
+            }
+            // Clean plan text for speaking — remove emojis and symbols
+            const cleanText = lastPlan
+                .replace(/[⚡🔴🟡🟢⏰⚠️💬📅🕐]/g, "")
+                .replace(/→/g, "")
+                .replace(/\*\*/g, "")
+                .trim();
+
+            const utt = new SpeechSynthesisUtterance(cleanText);
+            utt.rate = 0.95;
+            utt.pitch = 1;
+            utt.lang = 'en-IN';
+            utt.onstart = () => {
+                isSpeaking = true;
+                document.getElementById("speakBtn").innerHTML = '<svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="3" width="4" height="10" rx="1"/><rect x="10" y="3" width="4" height="10" rx="1"/></svg> ⏸ Stop Reading';
+            };
+            utt.onend = () => {
+                isSpeaking = false;
+                document.getElementById("speakBtn").innerHTML = '<svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><path d="M2 5h4l4-3v12l-4-3H2z"/><path d="M12 5a4 4 0 010 6"/></svg> 🔊 Read Aloud';
+            };
+            speechSynth.speak(utt);
+            toast("Reading your plan aloud...");
+        }
+
+        // ── NEW: Calendar Export (.ics) ─────────────────────────────────────────────
+        async function exportCalendar() {
+            if (!lastPlan) {
+                toast("Generate a plan first.");
+                return
+            }
+            const btn = document.getElementById("calBtn");
+            btn.disabled = true;
+            btn.textContent = "Extracting events...";
+            try {
+                const r = await fetch("/api/calendar", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        plan: lastPlan
+                    })
+                });
+                const d = await r.json();
+                if (!r.ok || d.error) {
+                    toast("Could not extract events. Try again.");
+                    return
+                }
+                if (!d.events || d.events.length === 0) {
+                    toast("No time-based events found in this plan.");
+                    return
+                }
+                generateICS(d.events);
+                toast(`📆 ${d.events.length} event(s) exported! Check your downloads.`);
+            } catch {
+                toast("Connection error — please try again.")
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round"><rect x="1" y="3" width="14" height="11" rx="2"/><path d="M1 7h14"/><path d="M5 1v4M11 1v4"/></svg> 📆 Add to Calendar'
+            }
+        }
+
+        function generateICS(events) {
+            const now = new Date();
+            const stamp = formatDT(now);
+            let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//DeadlineAI//EN\r\nCALSCALE:GREGORIAN\r\n";
+            events.forEach((ev, i) => {
+                const start = ev.date && ev.start_time ? ev.date.replace(/-/g, "") +
+                    "T" + ev.start_time.replace(/:/g, "") + "00" : "";
+                const end = ev.date && ev.end_time ? ev.date.replace(/-/g, "") +
+                    "T" + ev.end_time.replace(/:/g, "") + "00" : "";
+                if (!start || !end) return;
+                ics += "BEGIN:VEVENT\r\n";
+                ics += `UID:deadlineai-${i}-${Date.now()}@deadlineai\r\n`;
+                ics += `DTSTAMP:${stamp}\r\n`;
+                ics += `DTSTART:${start}\r\n`;
+                ics += `DTEND:${end}\r\n`;
+                ics += `SUMMARY:${(ev.title||"Task").replace(/,/g,"\\,")}\r\n`;
+                ics += `DESCRIPTION:${(ev.description||"").replace(/,/g,"\\,").replace(/\n/g,"\\n")}\r\n`;
+                ics += "END:VEVENT\r\n";
+            });
+            ics += "END:VCALENDAR";
+
+            const blob = new Blob([ics], {
+                type: "text/calendar;charset=utf-8"
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "DeadlineAI-Schedule.ics";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function formatDT(d) {
+            return d.getUTCFullYear() +
+                String(d.getUTCMonth() + 1).padStart(2, "0") +
+                String(d.getUTCDate()).padStart(2, "0") + "T" +
+                String(d.getUTCHours()).padStart(2, "0") +
+                String(d.getUTCMinutes()).padStart(2, "0") +
+                String(d.getUTCSeconds()).padStart(2, "0") + "Z";
+        }
+
+        // ── ORIGINAL helpers ────────────────────────────────────────────────────────
+        function showPlan(plan) {
+            document.getElementById("planOut").innerHTML = formatPlan(plan);
+            document.getElementById("outputBlock").classList.add("visible");
+            document.getElementById("reviseSection").classList.add("visible");
+            setTimeout(() => document.getElementById("outputBlock").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            }), 60);
+        }
+
+        function showError(msg) {
+            lastPlan = "";
+            const s = document.createElement("span");
+            s.className = "ln ln-crit";
+            s.textContent = "Warning: " + msg;
+            document.getElementById("planOut").innerHTML = s.outerHTML;
+            document.getElementById("outputBlock").classList.add("visible");
+            toast(msg);
+        }
+
+        function formatPlan(text) {
+            return text.split("\n").map(line => {
+                const U = line.toUpperCase();
+                let cls = "ln";
+                if (line.includes("⚡") || U.includes("RESCUE")) cls += " ln-rescue";
+                else if (line.includes("🔴") || U.includes("RIGHT NOW") || U.includes("CRITICAL")) cls += " ln-crit";
+                else if (line.includes("🟡") || U.includes("IMPORTANT")) cls += " ln-imp";
+                else if (line.includes("🟢") || U.includes("CAN WAIT") || U.includes("THIS WEEK")) cls += " ln-wait";
+                else if (line.includes("⏰") || U.includes("SCHEDULE") || line.includes("🕐")) cls += " ln-sched";
+                else if (line.includes("⚠️") || U.includes("REAL TALK")) cls += " ln-crit";
+                else if (line.includes("💬")) cls += " ln-mot";
+                else if (line.includes("📅")) cls += " ln-sched";
+                const s = document.createElement("span");
+                s.className = cls;
+                s.textContent = line;
+                return s.outerHTML;
+            }).join("");
+        }
+
+        function setLoading(on) {
+            document.getElementById("mainBtn").disabled = on;
+            document.getElementById("btnLabel").textContent = on ? "Analyzing..." : "Build my plan";
+            document.getElementById("progress").classList.toggle("active", on);
+        }
+
+        function copyPlan() {
+            if (!lastPlan) {
+                toast("No plan to copy yet.");
+                return
+            }
+            navigator.clipboard.writeText(lastPlan).then(() => toast("Plan copied."));
+        }
+
+        function saveHistory(prompt, plan) {
+            history.unshift({
+                prompt,
+                plan,
+                time: new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })
+            });
+            history = history.slice(0, 5);
+            sessionStorage.setItem("deadlineai_history", JSON.stringify(history));
+            renderHistory();
+            updateStats();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById("historyList");
+            if (!history.length) {
+                list.innerHTML = '<p class="empty">No plans yet. Your latest plans will appear here during this browser session.</p>';
+                return
+            }
+            list.innerHTML = history.map((item, i) => `
+    <button type="button" onclick="openHistory(${i})">
+      <span class="history-time">${item.time}</span>
+      ${escHtml(item.prompt.slice(0,72))}${item.prompt.length>72?"…":""}
+    </button>`).join("");
+        }
+
+        function openHistory(i) {
+            const item = history[i];
+            if (!item) return;
+            input.value = item.prompt;
+            lastInput = item.prompt;
+            lastPlan = item.plan;
+            showPlan(item.plan);
+            updateStats();
+            toast("Loaded a recent plan.");
+        }
+
+        function updateStats() {
+            const v = input.value.trim();
+            counter.textContent = input.value.length + " chars";
+            document.getElementById("wordsCount").textContent = v ? v.split(/\s+/).length : 0;
+            document.getElementById("plansCount").textContent = history.length;
+        }
+
+        function shake(el) {
+            el.style.animation = "none";
+            el.offsetHeight;
+            el.style.animation = "shake 0.38s ease";
+            setTimeout(() => el.style.animation = "", 420)
+        }
+
+        function toast(msg) {
+            const el = document.getElementById("toast");
+            el.textContent = msg;
+            el.classList.add("visible");
+            clearTimeout(window.__tt);
+            window.__tt = setTimeout(() => el.classList.remove("visible"), 2400);
+        }
+
+        function escHtml(t) {
+            return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        }
+    </script>
+</body>
+
+</html>
+HTMLEOF echo "done"
