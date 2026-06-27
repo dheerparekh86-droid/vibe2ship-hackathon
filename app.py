@@ -34,7 +34,32 @@ print("KEY BEING USED:", os.environ.get("GEMINI_API_KEY", "NOT FOUND")[:12])
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "deadlineai-dev-secret-change-me")
+from flask_sqlalchemy import SQLAlchemy
 
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "DATABASE_URL", "sqlite:///deadlineai.db"
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+db = SQLAlchemy(app)
+
+class Plan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.String(80), nullable=False)
+    input_text = db.Column(db.Text)
+    plan_text = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Task(db.Model):
+    id = db.Column(db.String(20), primary_key=True)
+    user = db.Column(db.String(80), nullable=False)
+    plan_id = db.Column(db.Integer, db.ForeignKey("plan.id"))
+    title = db.Column(db.String(200))
+    completed = db.Column(db.Boolean, default=False)
+    completed_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+with app.app_context():
+    db.create_all()
 MODEL_NAME = "gemini-2.5-flash-lite"
 # Collect all available keys — supports both single key and rotation
 GEMINI_KEYS = [
@@ -588,6 +613,9 @@ def generate_plan():
 
     try:
         plan = gemini_text(user_input, temperature=0.5, max_output_tokens=1200)
+        new_plan = Plan(user=session["user"], input_text=user_input, plan_text=plan)
+        db.session.add(new_plan)
+        db.session.commit()
         if not plan or "trouble reaching" in plan:
             return jsonify({"error": "AI is busy. Try again in 10 seconds."}), 503
 
@@ -838,8 +866,29 @@ def export_ics():
 @app.route("/health")
 def health():
     return jsonify({"status": "ok", "app": "DeadlineAI"})
+@app.route("/api/analytics")
+@login_required
+def analytics():
+    user = session["user"]
+    total_plans = Plan.query.filter_by(user=user).count()
+    total_tasks = Task.query.filter_by(user=user).count()
+    completed_tasks = Task.query.filter_by(user=user, completed=True).count()
+    recent_plans = Plan.query.filter_by(user=user)\
+        .order_by(Plan.created_at.desc()).limit(5).all()
+    
+    return jsonify({
+        "total_plans": total_plans,
+        "total_tasks": total_tasks,
+        "completed_tasks": completed_tasks,
+        "completion_rate": round((completed_tasks/total_tasks*100) if total_tasks else 0),
+        "recent_plans": [
+            {"input": p.input_text[:60], "created_at": p.created_at.isoformat()}
+            for p in recent_plans
+        ]
+    })
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
