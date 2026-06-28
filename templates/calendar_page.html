@@ -290,8 +290,25 @@
                 const r = await fetch('/api/calendar');
                 const d = await r.json();
                 allEvents = d.events || [];
+
+                // If API returned nothing, try localStorage
+                if (!allEvents.length) {
+                    const saved = localStorage.getItem('nexora_calendar_events');
+                    if (saved) allEvents = JSON.parse(saved);
+                } else {
+                    // Save fresh events to localStorage
+                    localStorage.setItem('nexora_calendar_events', JSON.stringify(allEvents));
+                }
+
                 renderEvents(allEvents);
-            } catch (e) {}
+            } catch (e) {
+                // On error, fall back to localStorage
+                const saved = localStorage.getItem('nexora_calendar_events');
+                if (saved) {
+                    allEvents = JSON.parse(saved);
+                    renderEvents(allEvents);
+                }
+            }
         }
 
         function renderEvents(events) {
@@ -326,12 +343,15 @@
                     body: JSON.stringify({})
                 });
                 const d = await r.json();
-                renderEvents(d.events || []);
+                allEvents = d.events || [];
+                localStorage.setItem('nexora_calendar_events', JSON.stringify(allEvents));
+                renderEvents(allEvents);
             } catch (e) {
                 alert('Could not extract events. Build a plan first.');
             }
             btn.disabled = false;
             btn.textContent = '✨ Extract from Plan';
+
         }
 
         async function exportICS() {

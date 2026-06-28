@@ -438,15 +438,17 @@ Rules:
 - Include scheduled work blocks and deadlines only.
 - If a start time exists but no end time exists, estimate a reasonable end time from the plan.
 - If no usable date/time exists, return an empty events array.
-- Maximum 20 events.
+- Maximum 50 events.
 
 Plan:
 {plan}
 """
-    data = gemini_json(prompt, {"events": []})
+    raw = gemini_text(prompt, temperature=0.15, max_output_tokens=2500,
+        system_instruction="Return only valid JSON. No markdown. No commentary.")
+    data = parse_json_object(raw) or {"events": []}
     events = data.get("events") if isinstance(data, dict) else []
     normalized = []
-    for event in events[:20]:
+    for event in events[:50]:
         if not isinstance(event, dict):
             continue
         title = str(event.get("title", "") or "Task").strip()[:120]
