@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login · Nexora</title>
+    <title>Sign Up · Nexora</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -120,22 +120,28 @@
             margin-bottom: 40px
         }
         
-        .stats {
+        .perks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            max-width: 400px;
+            margin-bottom: 40px
+        }
+        
+        .perk {
+            background: #131318;
+            border: 1px solid #1e1e2a;
+            border-radius: 12px;
+            padding: 14px 16px;
             display: flex;
-            gap: 36px;
-            margin-bottom: 48px
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #888
         }
         
-        .stat-num {
-            font-size: 26px;
-            font-weight: 800;
-            color: #fff
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #555;
-            margin-top: 2px
+        .perk span {
+            font-size: 18px
         }
         
         .floating-tasks {
@@ -229,7 +235,8 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 56px 48px
+            padding: 48px 48px;
+            overflow-y: auto
         }
         
         .tab-row {
@@ -238,7 +245,7 @@
             border: 1px solid #1e1e2a;
             border-radius: 10px;
             padding: 3px;
-            margin-bottom: 32px
+            margin-bottom: 28px
         }
         
         .tab {
@@ -270,7 +277,7 @@
         .right .sub {
             font-size: 13px;
             color: #555;
-            margin-bottom: 28px
+            margin-bottom: 24px
         }
         
         .error {
@@ -280,11 +287,11 @@
             padding: 10px 14px;
             font-size: 13px;
             color: #E24B4A;
-            margin-bottom: 18px
+            margin-bottom: 16px
         }
         
         .field {
-            margin-bottom: 16px
+            margin-bottom: 14px
         }
         
         .field label {
@@ -319,6 +326,12 @@
             color: #333
         }
         
+        .hint {
+            font-size: 11px;
+            color: #444;
+            margin-top: 5px
+        }
+        
         .submit {
             width: 100%;
             height: 50px;
@@ -329,12 +342,8 @@
             font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            margin-top: 4px;
-            transition: all .15s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px
+            margin-top: 6px;
+            transition: all .15s
         }
         
         .submit:hover {
@@ -346,44 +355,9 @@
             transform: none
         }
         
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 20px 0;
-            color: #222;
-            font-size: 12px
-        }
-        
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: #1a1a24
-        }
-        
-        .guest-btn {
-            width: 100%;
-            height: 46px;
-            background: transparent;
-            border: 1px solid #1e1e2a;
-            border-radius: 12px;
-            color: #555;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all .15s
-        }
-        
-        .guest-btn:hover {
-            border-color: #FF7A1A;
-            color: #FF7A1A
-        }
-        
         .footer-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 18px;
             font-size: 13px;
             color: #444
         }
@@ -418,21 +392,13 @@
         </div>
         <div class="left-body">
             <div class="eyebrow">AI-Powered Productivity</div>
-            <h1 class="hero-text">Stop surviving.<br>Start <span class="highlight">owning</span> your day.</h1>
-            <p class="hero-sub">The AI companion that turns deadline panic into focused action — before it's too late.</p>
-            <div class="stats">
-                <div>
-                    <div class="stat-num">3.2×</div>
-                    <div class="stat-label">more tasks done</div>
-                </div>
-                <div>
-                    <div class="stat-num">94%</div>
-                    <div class="stat-label">deadline hit rate</div>
-                </div>
-                <div>
-                    <div class="stat-num">Always</div>
-                    <div class="stat-label">your next best step</div>
-                </div>
+            <h1 class="hero-text">Your best move,<br><span class="highlight">always</span> one step away.</h1>
+            <p class="hero-sub">Join thousands who stopped drowning in deadlines and started actually finishing things.</p>
+            <div class="perks-grid">
+                <div class="perk"><span>📋</span> Plan history</div>
+                <div class="perk"><span>✅</span> Task tracking</div>
+                <div class="perk"><span>📅</span> Calendar sync</div>
+                <div class="perk"><span>📈</span> Analytics</div>
             </div>
             <div class="floating-tasks">
                 <div class="ftask"><span class="dot dot-red"></span> Submit assignment — due tonight</div>
@@ -454,21 +420,24 @@
 
     <div class="right">
         <div class="tab-row">
-            <a href="/login" class="tab active">Sign In</a>
-            <a href="/register" class="tab">Get Started</a>
+            <a href="/login" class="tab">Sign In</a>
+            <a href="/register" class="tab active">Get Started</a>
         </div>
-        <h2>Welcome back</h2>
-        <p class="sub">Your tasks are waiting. Let's fix that.</p>
+        <h2>Create your account</h2>
+        <p class="sub">Your plans, tasks, and history — all saved.</p>
         {% if error %}
         <div class="error">{{ error }}</div>{% endif %}
         <form method="post">
-            <div class="field"><label>Username</label><input type="text" name="username" placeholder="demo" required autocomplete="username"></div>
-            <div class="field"><label>Password</label><input type="password" name="password" placeholder="••••••••" required autocomplete="current-password"></div>
-            <button class="submit" type="submit">Sign In →</button>
+            <div class="field"><label>Username</label><input type="text" name="username" placeholder="e.g. joyboy" required minlength="2" maxlength="30" autocomplete="username"></div>
+            <div class="field"><label>Email</label><input type="email" name="email" placeholder="you@example.com" required autocomplete="email"></div>
+            <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+                <div class="hint">Min 6 characters</div>
+            </div>
+            <button class="submit" type="submit">Create account →</button>
         </form>
-        <div class="divider">or</div>
-        <a href="/guest-login" style="text-decoration:none"><button class="guest-btn">Continue as Guest (no account needed)</button></a>
-        <div class="footer-link">New here? <a href="/register">Create a free account</a></div>
+        <div class="footer-link">Already have an account? <a href="/login">Sign in</a></div>
     </div>
 </body>
 

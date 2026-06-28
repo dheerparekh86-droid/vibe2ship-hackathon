@@ -1,132 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DeadlineAI - Tasks</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#0B0B0F;color:#fff;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
-    .main{margin-left:220px;flex:1;padding:32px;min-height:100vh}
-    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
-    .topbar h1{font-size:24px;font-weight:700;color:#fff}
-    .filters{display:flex;gap:8px;margin-bottom:20px}
-    .filter-btn{padding:6px 16px;border-radius:20px;border:1px solid #1e1e2a;background:transparent;color:#666;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s}
-    .filter-btn.active{background:#FF7A1A;border-color:#FF7A1A;color:#fff}
-    .search-bar{display:flex;align-items:center;gap:12px;background:#15161A;border:1px solid #1e1e2a;border-radius:10px;padding:10px 16px;margin-bottom:20px}
-    .search-bar input{background:transparent;border:none;outline:none;color:#fff;font-size:14px;flex:1;font-family:'Inter',sans-serif}
-    .search-bar input::placeholder{color:#444}
-    .task-card{background:#15161A;border:1px solid #1e1e2a;border-radius:12px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;transition:all 0.15s;cursor:pointer}
-    .task-card:hover{border-color:#2a2a3a;background:#1a1a24}
-    .task-card.done{opacity:0.5}
-    .task-card.done .task-title{text-decoration:line-through;color:#555}
-    .checkbox{width:20px;height:20px;border-radius:50%;border:2px solid #333;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
-    .checkbox.checked{background:#FF7A1A;border-color:#FF7A1A;color:#fff;font-size:12px}
-    .task-info{flex:1;min-width:0}
-    .task-title{font-size:14px;font-weight:500;color:#fff;margin-bottom:4px}
-    .task-meta{display:flex;align-items:center;gap:12px;font-size:12px;color:#555}
-    .priority-badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
-    .priority-high{background:#2a0a0a;color:#E24B4A}
-    .priority-normal{background:#1a1208;color:#FF7A1A}
-    .priority-low{background:#0a1a0a;color:#1D9E75}
-    .empty-state{text-align:center;padding:60px 20px;color:#444}
-    .empty-state .icon{font-size:48px;margin-bottom:16px}
-    .empty-state p{font-size:15px;margin-bottom:20px}
-    .btn-primary{background:#FF7A1A;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
-    .progress-bar-wrap{background:#1e1e2a;border-radius:4px;height:4px;margin-bottom:24px;overflow:hidden}
-    .progress-bar-fill{background:linear-gradient(90deg,#FF7A1A,#ff9a4a);height:4px;border-radius:4px;transition:width 0.5s}
-    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-    .stat-card{background:#15161A;border:1px solid #1e1e2a;border-radius:10px;padding:16px}
-    .stat-card .label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-    .stat-card .value{font-size:24px;font-weight:700;color:#fff}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora - Tasks</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+        body {
+            background: #0B0B0F;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh
+        }
+        
+        .main {
+            margin-left: 220px;
+            flex: 1;
+            padding: 32px;
+            min-height: 100vh
+        }
+        
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px
+        }
+        
+        .topbar h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff
+        }
+        
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px
+        }
+        
+        .filter-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #1e1e2a;
+            background: transparent;
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s
+        }
+        
+        .filter-btn.active {
+            background: #FF7A1A;
+            border-color: #FF7A1A;
+            color: #fff
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin-bottom: 20px
+        }
+        
+        .search-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 14px;
+            flex: 1;
+            font-family: 'Inter', sans-serif
+        }
+        
+        .search-bar input::placeholder {
+            color: #444
+        }
+        
+        .task-card {
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.15s;
+            cursor: pointer
+        }
+        
+        .task-card:hover {
+            border-color: #2a2a3a;
+            background: #1a1a24
+        }
+        
+        .task-card.done {
+            opacity: 0.5
+        }
+        
+        .task-card.done .task-title {
+            text-decoration: line-through;
+            color: #555
+        }
+        
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            flex-shrink: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s
+        }
+        
+        .checkbox.checked {
+            background: #FF7A1A;
+            border-color: #FF7A1A;
+            color: #fff;
+            font-size: 12px
+        }
+        
+        .task-info {
+            flex: 1;
+            min-width: 0
+        }
+        
+        .task-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 4px
+        }
+        
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: #555
+        }
+        
+        .priority-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600
+        }
+        
+        .priority-high {
+            background: #2a0a0a;
+            color: #E24B4A
+        }
+        
+        .priority-normal {
+            background: #1a1208;
+            color: #FF7A1A
+        }
+        
+        .priority-low {
+            background: #0a1a0a;
+            color: #1D9E75
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #444
+        }
+        
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px
+        }
+        
+        .empty-state p {
+            font-size: 15px;
+            margin-bottom: 20px
+        }
+        
+        .btn-primary {
+            background: #FF7A1A;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer
+        }
+        
+        .progress-bar-wrap {
+            background: #1e1e2a;
+            border-radius: 4px;
+            height: 4px;
+            margin-bottom: 24px;
+            overflow: hidden
+        }
+        
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #FF7A1A, #ff9a4a);
+            height: 4px;
+            border-radius: 4px;
+            transition: width 0.5s
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px
+        }
+        
+        .stat-card {
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 10px;
+            padding: 16px
+        }
+        
+        .stat-card .label {
+            font-size: 11px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 6px
+        }
+        
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff
+        }
+    </style>
 </head>
+
 <body>
-{% include 'sidebar.html' %}
-<main class="main">
-  <div class="topbar">
-    <h1>All Tasks</h1>
-    <button class="btn-primary" onclick="window.location='/'">+ New Plan</button>
-  </div>
+    {% include 'sidebar.html' %}
+    <main class="main">
+        <div class="topbar">
+            <h1>All Tasks</h1>
+            <button class="btn-primary" onclick="window.location='/'">+ New Plan</button>
+        </div>
 
-  <div class="stats-row">
-    <div class="stat-card"><div class="label">Total</div><div class="value" id="stat-total">0</div></div>
-    <div class="stat-card"><div class="label" style="color:#E24B4A">Remaining</div><div class="value" style="color:#E24B4A" id="stat-remaining">0</div></div>
-    <div class="stat-card"><div class="label" style="color:#1D9E75">Completed</div><div class="value" style="color:#1D9E75" id="stat-done">0</div></div>
-    <div class="stat-card"><div class="label" style="color:#FF7A1A">Progress</div><div class="value" style="color:#FF7A1A" id="stat-percent">0%</div></div>
-  </div>
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="label">Total</div>
+                <div class="value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label" style="color:#E24B4A">Remaining</div>
+                <div class="value" style="color:#E24B4A" id="stat-remaining">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label" style="color:#1D9E75">Completed</div>
+                <div class="value" style="color:#1D9E75" id="stat-done">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label" style="color:#FF7A1A">Progress</div>
+                <div class="value" style="color:#FF7A1A" id="stat-percent">0%</div>
+            </div>
+        </div>
 
-  <div class="progress-bar-wrap">
-    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-  </div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
 
-  <div class="search-bar">
-    <span style="color:#444">🔍</span>
-    <input type="text" placeholder="Search tasks..." id="search-input" oninput="filterTasks()">
-  </div>
+        <div class="search-bar">
+            <span style="color:#444">🔍</span>
+            <input type="text" placeholder="Search tasks..." id="search-input" oninput="filterTasks()">
+        </div>
 
-  <div class="filters">
-    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-    <button class="filter-btn" onclick="setFilter('pending', this)">Pending</button>
-    <button class="filter-btn" onclick="setFilter('done', this)">Completed</button>
-    <button class="filter-btn" onclick="setFilter('high', this)">High Priority</button>
-  </div>
+        <div class="filters">
+            <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+            <button class="filter-btn" onclick="setFilter('pending', this)">Pending</button>
+            <button class="filter-btn" onclick="setFilter('done', this)">Completed</button>
+            <button class="filter-btn" onclick="setFilter('high', this)">High Priority</button>
+        </div>
 
-  <div id="task-list"></div>
-</main>
+        <div id="task-list"></div>
+    </main>
 
-<script>
-let allTasks = [];
-let currentFilter = 'all';
+    <script>
+        let allTasks = [];
+        let currentFilter = 'all';
 
-async function loadTasks() {
-  try {
-    const r = await fetch('/api/tasks');
-    const d = await r.json();
-    allTasks = d.tasks || [];
-    const p = d.progress || {};
-    document.getElementById('stat-total').textContent = p.total || 0;
-    document.getElementById('stat-remaining').textContent = p.remaining || 0;
-    document.getElementById('stat-done').textContent = p.done || 0;
-    document.getElementById('stat-percent').textContent = (p.percent || 0) + '%';
-    document.getElementById('progress-fill').style.width = (p.percent || 0) + '%';
-    renderTasks();
-  } catch(e) {
-    document.getElementById('task-list').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>Could not load tasks.</p></div>';
-  }
-}
+        async function loadTasks() {
+            try {
+                const r = await fetch('/api/tasks');
+                const d = await r.json();
+                allTasks = d.tasks || [];
+                const p = d.progress || {};
+                document.getElementById('stat-total').textContent = p.total || 0;
+                document.getElementById('stat-remaining').textContent = p.remaining || 0;
+                document.getElementById('stat-done').textContent = p.done || 0;
+                document.getElementById('stat-percent').textContent = (p.percent || 0) + '%';
+                document.getElementById('progress-fill').style.width = (p.percent || 0) + '%';
+                renderTasks();
+            } catch (e) {
+                document.getElementById('task-list').innerHTML = '<div class="empty-state"><div class="icon">⚠️</div><p>Could not load tasks.</p></div>';
+            }
+        }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTasks();
-}
+        function setFilter(f, btn) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderTasks();
+        }
 
-function filterTasks() { renderTasks(); }
+        function filterTasks() {
+            renderTasks();
+        }
 
-function renderTasks() {
-  const search = document.getElementById('search-input').value.toLowerCase();
-  let tasks = allTasks.filter(t => {
-    if (search && !t.title.toLowerCase().includes(search)) return false;
-    if (currentFilter === 'pending') return !t.completed;
-    if (currentFilter === 'done') return t.completed;
-    if (currentFilter === 'high') return t.priority === 'high';
-    return true;
-  });
+        function renderTasks() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            let tasks = allTasks.filter(t => {
+                if (search && !t.title.toLowerCase().includes(search)) return false;
+                if (currentFilter === 'pending') return !t.completed;
+                if (currentFilter === 'done') return t.completed;
+                if (currentFilter === 'high') return t.priority === 'high';
+                return true;
+            });
 
-  if (!tasks.length) {
-    document.getElementById('task-list').innerHTML = `
+            if (!tasks.length) {
+                document.getElementById('task-list').innerHTML = `
       <div class="empty-state">
         <div class="icon">📋</div>
         <p>No tasks yet. Build a plan first to see your tasks here.</p>
         <button class="btn-primary" onclick="window.location='/'">Build a Plan</button>
       </div>`;
-    return;
-  }
+                return;
+            }
 
-  document.getElementById('task-list').innerHTML = tasks.map(t => `
+            document.getElementById('task-list').innerHTML = tasks.map(t => `
     <div class="task-card ${t.completed ? 'done' : ''}" id="task-${t.id}">
       <div class="checkbox ${t.completed ? 'checked' : ''}" onclick="toggleTask('${t.id}', ${!t.completed})">
         ${t.completed ? '✓' : ''}
@@ -159,6 +382,7 @@ function escHtml(t) {
 }
 
 loadTasks();
-</script>
+    </script>
 </body>
+
 </html>

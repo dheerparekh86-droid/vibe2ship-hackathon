@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeadlineAI - Dashboard</title>
+    <title>Nexora - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *,
@@ -420,12 +420,14 @@
         
         .bottom-grid {
             display: grid;
-            grid-template-columns: 1fr 340px;
+            grid-template-columns: 1fr 360px;
             gap: 20px;
         }
         /* ── CRITICAL TASKS ── */
         
         .critical-section .section-head-row {
+            position: relative;
+            z-index: 1;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -443,6 +445,8 @@
         }
         
         .task-list {
+            position: relative;
+            z-index: 1;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -558,6 +562,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            min-width: 0;
         }
         /* Productivity chart */
         
@@ -830,6 +835,17 @@
         .toast.show {
             opacity: 1;
             transform: translateY(0);
+            @keyframes pulse-dot {
+                0%,
+                100% {
+                    opacity: 1;
+                    transform: scale(1)
+                }
+                50% {
+                    opacity: 0.4;
+                    transform: scale(1.5)
+                }
+            }
         }
     </style>
 </head>
@@ -839,10 +855,10 @@
     <!-- ── SIDEBAR ── -->
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon">⚡</div>
+            <img src="/static/logo.png" alt="Nexora" style="width:36px;height:36px;border-radius:10px;object-fit:contain">
             <div class="brand-text">
-                <div class="name">DeadlineAI</div>
-                <div class="sub">AI Companion</div>
+                <div class="name" style="font-size:20px;font-weight:800;background:linear-gradient(135deg,#1a6fd4,#4f9cf9,#1a3a8f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.02em;line-height:1.1">Nexora</div>
+                <div class="sub" style="font-size:9px;color:#555;letter-spacing:.01em;text-transform:none;margin-top:2px">Always your next best step.</div>
             </div>
         </div>
 
@@ -865,9 +881,7 @@
                 <span class="nav-icon">🤖</span> AI Assistant
                 <span class="ai-badge">AI</span>
             </a>
-            <a href="/habits" class="nav-item">
-                <span class="nav-icon">🎯</span> Habits
-            </a>
+
             <a href="/calendar-view" class="nav-item">
                 <span class="nav-icon">📅</span> Calendar
             </a>
@@ -953,7 +967,8 @@
         <div class="bottom-grid">
 
             <!-- Critical tasks -->
-            <div class="critical-section">
+            <div class="critical-section" style="background-image:url('/static/bg.jpg');background-size:cover;background-position:center;border-radius:16px;padding:20px;border:1px solid #1e1e2a;position:relative;overflow:hidden;min-height:280px">
+                <div style="position:absolute;inset:0;background:rgba(0,0,0,0.6);border-radius:16px;z-index:0"></div>
                 <div class="section-head-row">
                     <div class="section-head" style="margin-bottom:0">
                         <h2>Critical &amp; Due Today</h2>
@@ -971,86 +986,88 @@
 
                 <!-- Weekly productivity chart -->
                 <div class="chart-card">
-                    <div class="chart-label">Weekly Productivity</div>
-                    <div class="chart-title">This Week</div>
+
+                    <div id="motivational-msg" style="font-size:13px;font-weight:700;color:#FF7A1A;margin-bottom:4px;opacity:0;transition:opacity 1s ease"></div>
+                    <div id="motivational-sub" style="font-size:11px;color:#555;margin-bottom:12px;opacity:0;transition:opacity 1.4s ease"></div>
                     <div class="mini-chart">
-                        <svg viewBox="0 0 300 90" preserveAspectRatio="none">
+                        <svg viewBox="0 0 300 90" preserveAspectRatio="none" id="chart-svg">
             <defs>
-              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#FF7A1A" stop-opacity="0.3"/>
-                <stop offset="100%" stop-color="#FF7A1A" stop-opacity="0"/>
-              </linearGradient>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#FF7A1A" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#FF7A1A" stop-opacity="0"/>
+                </linearGradient>
+                <clipPath id="chart-clip">
+                    <rect id="clip-rect" x="0" y="0" width="0" height="90"/>
+                </clipPath>
             </defs>
-            <!-- Grid lines -->
             <line x1="0" y1="0"  x2="300" y2="0"  stroke="#1E1E2A" stroke-width="1"/>
             <line x1="0" y1="30" x2="300" y2="30" stroke="#1E1E2A" stroke-width="1"/>
             <line x1="0" y1="60" x2="300" y2="60" stroke="#1E1E2A" stroke-width="1"/>
             <line x1="0" y1="90" x2="300" y2="90" stroke="#1E1E2A" stroke-width="1"/>
-            <!-- Area fill -->
-            <path d="M0,70 C30,65 50,40 80,35 C110,30 130,55 160,40 C190,25 220,15 250,20 C270,23 290,18 300,10 L300,90 L0,90 Z"
-                  fill="url(#chartGrad)"/>
-            <!-- Line -->
-            <path d="M0,70 C30,65 50,40 80,35 C110,30 130,55 160,40 C190,25 220,15 250,20 C270,23 290,18 300,10"
-                  fill="none" stroke="#FF7A1A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <!-- Y labels -->
+            <g clip-path="url(#chart-clip)">
+                <path d="M0,70 C30,65 50,40 80,35 C110,30 130,55 160,40 C190,25 220,15 250,20 C270,23 290,18 300,10 L300,90 L0,90 Z" fill="url(#chartGrad)"/>
+                <path d="M0,70 C30,65 50,40 80,35 C110,30 130,55 160,40 C190,25 220,15 250,20 C270,23 290,18 300,10" fill="none" stroke="#FF7A1A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
             <text x="4" y="8"  font-size="8" fill="#555566">100</text>
             <text x="4" y="38" font-size="8" fill="#555566">50</text>
             <text x="4" y="68" font-size="8" fill="#555566">25</text>
             <text x="4" y="88" font-size="8" fill="#555566">0</text>
-          </svg>
+        </svg>
                     </div>
                     <div class="chart-x-labels">
                         <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
                     </div>
                 </div>
+                <div class="habits-card" id="ai-brain-card">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+                        <div style="width:8px;height:8px;border-radius:50%;background:#22c9e0;box-shadow:0 0 8px #22c9e0;animation:pulse-dot 2s infinite"></div>
+                        <h2 style="margin:0;font-size:14px;font-weight:700">⚡ AI Brain Analysis</h2>
+                    </div>
 
-                <!-- Habit streaks -->
-                <div class="habits-card">
-                    <h2>Habit Streaks</h2>
-                    <div id="habit-streaks">
-                        <div class="habit-row">
-                            <div class="habit-emoji">☀️</div>
-                            <div class="habit-info">
-                                <div class="habit-name">Morning Review</div>
-                                <div class="habit-bar-track">
-                                    <div class="habit-bar-fill" style="width:86%;background:var(--orange)"></div>
-                                </div>
-                            </div>
-                            <div class="habit-streak" style="color:var(--orange)">🔥 12</div>
+                    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0f0f14;border-radius:8px;border:1px solid #1e1e2a">
+                            <span style="font-size:12px;color:#888">Stress Level</span>
+                            <span id="brain-stress" style="font-size:12px;font-weight:600">🔴 High</span>
                         </div>
-                        <div class="habit-row">
-                            <div class="habit-emoji">🧠</div>
-                            <div class="habit-info">
-                                <div class="habit-name">Deep Work Block</div>
-                                <div class="habit-bar-track">
-                                    <div class="habit-bar-fill" style="width:100%;background:var(--cyan)"></div>
-                                </div>
-                            </div>
-                            <div class="habit-streak" style="color:var(--cyan)">🔥 7</div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0f0f14;border-radius:8px;border:1px solid #1e1e2a">
+                            <span style="font-size:12px;color:#888">Focus Level</span>
+                            <span id="brain-focus" style="font-size:12px;font-weight:600">🟢 Excellent</span>
                         </div>
-                        <div class="habit-row">
-                            <div class="habit-emoji">⚡</div>
-                            <div class="habit-info">
-                                <div class="habit-name">Exercise</div>
-                                <div class="habit-bar-track">
-                                    <div class="habit-bar-fill" style="width:60%;background:var(--purple)"></div>
-                                </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0f0f14;border-radius:8px;border:1px solid #1e1e2a">
+                            <span style="font-size:12px;color:#888">Burnout Risk</span>
+                            <span id="brain-burnout" style="font-size:12px;font-weight:600">🟡 Moderate</span>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0f0f14;border-radius:8px;border:1px solid #1e1e2a">
+                            <span style="font-size:12px;color:#888">Productivity</span>
+                            <span id="brain-productivity" style="font-size:12px;font-weight:600">🔵 Increasing</span>
+                        </div>
+                    </div>
+
+                    <div style="background:#0f1a1a;border:1px solid #1a2e2e;border-radius:10px;padding:12px">
+                        <div style="font-size:11px;color:#22c9e0;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">Next Best Action</div>
+                        <div style="display:flex;align-items:flex-start;gap:8px">
+                            <span style="color:#FF7A1A;font-weight:700;margin-top:1px">→</span>
+                            <div>
+                                <div id="brain-action" style="font-size:13px;font-weight:600;color:#fff">Build your first plan</div>
+                                <div id="brain-estimate" style="font-size:11px;color:#555;margin-top:3px">Go to AI Assistant to get started</div>
                             </div>
-                            <div class="habit-streak" style="color:var(--purple)">🔥 4</div>
                         </div>
                     </div>
                 </div>
+                <!-- end right-col -->
 
             </div>
-        </div>
+            <!-- end bottom-grid -->
     </main>
 
     <!-- ── ADD TASK MODAL ── -->
     <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
         <div class="modal">
             <h3>Add New Task</h3>
-            <p>Add a task to your DeadlineAI checklist.</p>
+            <p>Add a task to your Nexora checklist.</p>
             <div class="modal-field">
+
+
                 <label>Task title</label>
                 <input type="text" id="task-title" placeholder="e.g. Submit quarterly report">
             </div>
@@ -1147,7 +1164,7 @@
 
                 // Critical tasks
                 renderCriticalTasks(tasks);
-
+                updateAIBrain(tasks);
             } catch (e) {
                 document.getElementById('critical-tasks').innerHTML =
                     '<div style="color:var(--text3);font-size:13px;padding:20px 0;text-align:center">Build a plan first to see your tasks here.</div>';
@@ -1351,6 +1368,69 @@
   });
 
   loadDashboard();
+  // ── Chart draw animation + motivational message ──
+const messages = [
+    "💪 Every task done is momentum built.",
+    "🚀 You're ahead of where you were yesterday.",
+    "🎯 Focus on the next step, not the whole staircase.",
+    "⚡ Deadlines don't scare people who have a plan.",
+    "🔥 Small wins compound into big results."
+];
+
+function animateChart() {
+    const clipRect = document.getElementById('clip-rect');
+    const msg = document.getElementById('motivational-msg');
+    if (!clipRect || !msg) return;
+
+    // Pick random message
+    msg.textContent = messages[Math.floor(Math.random() * messages.length)];
+
+    // Animate clip rect from 0 to 300 width over 1.4s
+    let start = null;
+    const duration = 1400;
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        clipRect.setAttribute('width', eased * 300);
+        if (progress < 1) requestAnimationFrame(step);
+        else {
+            // Fade in message after chart finishes
+            msg.style.opacity = '1';
+        }
+    }
+    // Small delay on page load
+    setTimeout(() => requestAnimationFrame(step), 600);
+}
+function updateAIBrain(tasks) {
+    const total = tasks.length;
+    const done = tasks.filter(t => t.completed).length;
+    const high = tasks.filter(t => !t.completed && t.priority === 'high').length;
+    const remaining = total - done;
+    const pct = total ? Math.round(done / total * 100) : 0;
+
+    const stressEl = document.getElementById('brain-stress');
+    if (stressEl) stressEl.textContent = high >= 3 ? '🔴 High' : high >= 1 ? '🟡 Moderate' : '🟢 Low';
+
+    const focusEl = document.getElementById('brain-focus');
+    if (focusEl) focusEl.textContent = pct >= 60 ? '🟢 Excellent' : pct >= 30 ? '🔵 Good' : '🟡 Building';
+
+    const burnoutEl = document.getElementById('brain-burnout');
+    if (burnoutEl) burnoutEl.textContent = remaining >= 6 ? '🔴 High Risk' : remaining >= 3 ? '🟡 Moderate' : '🟢 Low';
+
+    const prodEl = document.getElementById('brain-productivity');
+    if (prodEl) prodEl.textContent = pct >= 50 ? '🔵 Increasing' : done > 0 ? '🟡 Building' : '⚪ Not started';
+
+    const nextTask = tasks.find(t => !t.completed);
+    const actionEl = document.getElementById('brain-action');
+    const estimateEl = document.getElementById('brain-estimate');
+    if (actionEl && nextTask) {
+        actionEl.textContent = nextTask.title;
+        estimateEl.textContent = nextTask.estimate_minutes ? `Estimated ${nextTask.estimate_minutes} min` : 'Start this next';
+    }
+}
+
+animateChart();
     </script>
 </body>
 

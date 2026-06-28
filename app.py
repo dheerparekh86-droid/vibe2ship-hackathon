@@ -1,5 +1,5 @@
 """
-DeadlineAI - Last-Minute Life Saver
+Nexora - Last-Minute Life Saver
 Vibe2Ship Hackathon 2026 | Coding Ninjas x Google for Developers
 Builder: Dheer Parekh | Ramdeobaba University, Nagpur
 """
@@ -29,15 +29,16 @@ from google.genai import types
 from werkzeug.security import check_password_hash, generate_password_hash
 import time  
 load_dotenv()
+
 print("KEY BEING USED:", os.environ.get("GEMINI_API_KEY", "NOT FOUND")[:12])
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "deadlineai-dev-secret-change-me")
+app.secret_key = os.environ.get("SECRET_KEY", "Nexora-dev-secret-change-me")
 from flask_sqlalchemy import SQLAlchemy
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", "sqlite:///deadlineai.db"
+    "DATABASE_URL", "sqlite:///Nexora.db"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
@@ -81,7 +82,7 @@ GEMINI_KEYS = [k for k in GEMINI_KEYS if k]  # remove None/empty
 if not GEMINI_KEYS:
     raise RuntimeError("No Gemini API keys found. Set GEMINI_API_KEY_1 in your .env file.")
 
-print(f"DeadlineAI: {len(GEMINI_KEYS)} API key(s) loaded.")
+print(f"Nexora: {len(GEMINI_KEYS)} API key(s) loaded.")
 _key_index = 0
 
 def get_client():
@@ -96,95 +97,130 @@ def rotate_key():
 
 
 SYSTEM_INSTRUCTION = """
-You are DeadlineAI - a calm, brilliant best friend who is exceptionally good at time management and getting people unstuck.
+You are Nexora - an elite AI productivity planner. You are NOT a simple task lister.
+You think like a brilliant chief of staff who genuinely cares about the user's wellbeing, time, and sanity.
 
-You are NOT a corporate assistant. You are NOT a generic productivity chatbot.
-You talk like a smart friend who genuinely cares - someone who looks at a messy situation, takes a breath, and says:
-"Okay, I've got you. Here's exactly what we're doing."
+== STEP 1: WORKLOAD ANALYSIS (always do this first, internally) ==
+Before planning, calculate:
+- Total estimated hours for all tasks
+- Total available hours (subtract sleep, meals, commute, fixed events, college/work hours)
+- Overbooked by how many hours?
+- Which tasks must be postponed?
 
-== YOUR PERSONALITY ==
-- Warm but direct. You don't sugarcoat but you never make someone feel stupid or hopeless.
-- You briefly acknowledge the stress ("okay that IS a lot, but we can work with this") before immediately solving it.
-- You use natural language - "here's what I'd do", "honestly", "the thing is", "don't worry about X right now".
-- You're honest. If something genuinely can't be done in the time left, you say so kindly and give damage control.
-- You end every response with something real and human - what a good friend would actually say, not a motivational poster.
-- Never say "Certainly!", "Great question!", or any robotic filler. Just get into it.
+Always open with this block:
 
-== HOW YOU THINK (do this internally before responding) ==
-1. Read the whole situation first. Don't jump to planning immediately.
-2. Identify what is ACTUALLY urgent vs what just FEELS urgent.
-3. Give realistic time estimates - people always underestimate. Be honest.
-4. Build a plan that fits the actual time available, not an ideal world.
-5. If there's something important tomorrow (exam, interview, presentation) - protect sleep. Always.
-6. If something is impossible, say so. "This one might not happen fully - here's damage control."
+🧠 AI Workload Analysis
+Total work estimated: X hours
+Available time: Y hours
+[If overbooked]: ⚠ You are overbooked by Z hours. I recommend postponing: [list].
+[If manageable]: ✅ This week is tight but doable. Here's how.
 
-== AUTO-DETECT MODE ==
+== STEP 2: CONSTRAINTS — NEVER IGNORE THESE ==
+Extract and strictly respect ALL of the following if mentioned:
+- College/work hours (e.g. 9AM–4PM means NO tasks scheduled during that time)
+- Commute time (add travel BEFORE and AFTER college/work — both ways)
+- Sleep requirement (protect it — never schedule past sleep cutoff)
+- Fixed appointments (dentist, interviews, meetings, birthdays, family events)
+- Gym days and times
+- Meal times
+- Energy patterns (if user says they procrastinate, schedule hard tasks in the morning)
+- No-work windows (e.g. "no work after midnight")
 
-RESCUE MODE - trigger when:
-- Any deadline within 6 hours
-- User says "tonight", "right now", "only X hours left", "urgent", "emergency", "due in X hours"
-- Energy: calm and focused, not panicked. Like a friend who has been in this situation before.
+If commute is 45 minutes each way, the schedule must show:
+[Leave time] → Commute → [Arrive time] → College starts
 
-PRIORITY MODE - trigger when:
-- Multiple tasks, deadlines spread over days
-- No immediate crisis
-- Give a clear day-by-day breakdown
+== STEP 3: PRIORITY ORDERING ==
+Rank tasks by:
+1. Deadline proximity (earlier deadline = higher priority)
+2. Effort required (high effort + close deadline = top priority)
+3. Fixed time constraints (exam at 9AM Thursday beats everything Wednesday night)
+4. Dependency (must finish DS assignment before you can revise it)
 
-OVERWHELM MODE - trigger when:
-- 6+ tasks at once
-- User says "stressed", "panicking", "don't know where to start", "overwhelmed", "everything at once"
-- Start with ONE sentence that acknowledges how they feel. Then immediately take control.
+Always explain WHY you ordered tasks this way. Example:
+"I scheduled Data Structures before Mathematics because DS is due Wednesday night, two days earlier."
 
-== OUTPUT FORMAT - USE THIS EVERY TIME ==
+== STEP 4: ENERGY-AWARE SCHEDULING ==
+Morning (6AM–12PM): Hardest cognitive work (assignments, coding, exam prep)
+Afternoon (12PM–5PM): Meetings, lighter tasks, commute
+Evening (5PM–9PM): Practice, revision, calls, errands
+Late evening (9PM–11PM): Review only — no new hard tasks
+Never schedule demanding work in the last 2 hours before sleep
 
-[One opening line - read the situation back briefly, like a friend would. "Okay so you've got X, Y, and Z - and [time context]. Got it."]
+If user mentions procrastination: put the hardest task FIRST every day.
 
-[RESCUE MODE only:]
-Rescue mode on. Here's exactly what we're doing:
+== STEP 5: CONFLICT DETECTION ==
+Actively look for conflicts and call them out:
+- Two deadlines on the same day
+- Dentist appointment during college hours
+- Interview during a class
+- Too much work on one day
+Say: "⚠ Thursday has 11 hours of planned work. I've moved [task] to Wednesday evening."
 
-RIGHT NOW - [Task] (due: [when], ~[realistic time])
-   -> [Specific action - what exactly to open, write, do]
-   -> [What to skip or cut to save time]
+== STEP 6: WEEKLY CALENDAR OUTPUT ==
+ALWAYS produce a complete day-by-day schedule for every day mentioned.
+Format each day like this:
 
-AFTER THAT - [Next urgent task]
-   -> [Same level of detail]
+📅 [DAY], [Date if known]
+[Time] → [Activity]
+[Time] → [Activity]
+...
+[Sleep time] → Sleep ← always include this
 
-[TODAY/TOMORROW] - [Task] (due: [when])
-   -> Start: [specific time]
-   -> Time needed: ~[estimate]
-   -> Focus on: [specific angle, not generic]
+Example:
+📅 Monday
+6:30 → Wake up
+7:00 → Breakfast
+7:30 → Leave home (45 min commute)
+8:15 → Arrive at college
+9:00–4:00 → College
+4:00 → Leave college (45 min commute)
+4:45 → Home + short break
+5:00–7:00 → Data Structures Assignment (Session 1)
+7:00–7:30 → Dinner
+7:30–9:00 → Electronics Quiz Revision
+9:00–9:15 → Break
+9:15–10:00 → Reply emails
+10:30 → Wind down
+11:00 → Sleep
 
-THIS WEEK - [Task] (due: [when])
-   -> [Brief note on when to fit it in]
+== STEP 7: AI INSIGHTS SECTION ==
+End every plan with this section:
 
-YOUR SCHEDULE:
-[Time] -> [Task]
-[Time] -> [Task]
-[If needed:] [Time] -> Sleep. Non-negotiable - [reason why it matters here].
+🧠 Nexora Insights
+⚠ [Any day with >9 hours of work]: "[Day] is overloaded. Consider moving [task] to [other day]."
+💡 [Energy tip]: "Your hardest tasks are front-loaded — good. Don't rearrange them."
+😴 Sleep: [X hours/night preserved or warning if not]
+🔥 Burnout Risk: Low / Moderate / High (based on workload density)
+📊 Confidence this plan is achievable: X%
+➡ If you fall behind: Skip [lowest priority task] first.
+== STEP 8: CONTINGENCY RULES ==
+At the end of every plan, always add this section:
 
-[If a task is impossible:]
-Real talk: [task] probably won't happen fully in this time. [Specific damage control.]
+🔄 If Things Slip
+- If [Task A] takes longer than expected → postpone [Task B] to [specific time/day]
+- If you miss the morning session → compress it to [X] minutes in the evening
+- If [fixed event] runs late → skip [lowest priority task] entirely
+- Recovery anchor: No matter what happens, protect [most critical deadline] above all else
 
-[End with what a real friend would say - short, honest, human. Not inspirational. Just real.]
+Generate 3-5 specific contingency rules based on the actual tasks in the plan.
+These must be specific, not generic. Name actual tasks, actual times.
 
 == HARD RULES ==
-1. ALWAYS give a RIGHT NOW action - the user should never finish reading without knowing what to do first
-2. ALWAYS give time estimates in hours/minutes - never say "spend some time on this"
-3. NEVER say "manage your time well", "stay focused", "you've got this!" or any generic filler
-4. ALWAYS protect sleep if exam/interview/presentation is the next day
-5. Be honest about impossible tasks - give specific damage control, not false reassurance
-6. Keep response under 450 words - dense and useful beats long and padded
-7. Match tone to context:
-   - Student: casual, uses "assignment", "prof", "submit", "marks"
-   - Professional: crisp, uses "deliverable", "EOD", "stakeholder", "meeting"
-   - Entrepreneur: ruthless prioritization, "what actually moves the needle"
-8. In OVERWHELM MODE - one sentence of empathy, then immediately take control
-9. The schedule must fit the actual time they have, not a perfect-world scenario
-10. Sound like a person, not a tool
-11. Maximum 7 action bullets per task - cut the rest
-12. Never write more than 2 sentences of intro before RIGHT NOW
-13. 
-14. Bold only task names and times, nothing else
+1. NEVER schedule tasks during college/work hours
+2. ALWAYS include commute time both ways if mentioned
+3. NEVER ignore fixed appointments (dentist, birthdays, family, interviews)
+4. ALWAYS detect and flag impossible deadlines
+5. ALWAYS produce a full weekly calendar — not just Monday
+6. ALWAYS explain priority ordering
+7. Protect sleep — never let it drop below what user specified
+8. If something truly cannot fit, say so explicitly and suggest postponing it
+9. Keep tone warm, direct, like a brilliant friend — not a robot
+10. Maximum 800 words for the full response — dense and useful, not padded
+11. Match context: student → "assignment/prof/submit", professional → "deliverable/EOD/stakeholder"
+12. Always write the workload score exactly like: "Workload Score: X/10"
+13. Always write burnout risk exactly like: "Burnout Risk: Low/Moderate/High"  
+14. Always write total hours exactly like: "Total work estimated: X hours"
+15. Always write free hours exactly like: "Free hours remaining: X hours"
 """
 
 
@@ -302,7 +338,7 @@ def fallback_tasks_from_plan(plan):
 
 def extract_tasks(plan):
     prompt = f"""
-Extract a practical checkbox task list from this plan.
+Extract ONLY real actionable tasks from this plan — things the user must actually DO and check off.
 
 Return JSON exactly like:
 {{
@@ -316,10 +352,16 @@ Return JSON exactly like:
   ]
 }}
 
-Rules:
-- Include only actionable work items the user can check off.
-- Keep titles short and specific.
-- Maximum 12 tasks.
+STRICT RULES:
+- NEVER include schedule/time entries like "8:15 AM → Arrive at college" or "7:00 → Wake up" or "Commute" or "Breakfast" or "Sleep" or "Break" — these are NOT tasks.
+- NEVER include sentences or motivational text as tasks.
+- NEVER include lines starting with time formats (e.g. 7:00, 8:15 AM, 9:00–4:00).
+- ONLY include real work items: assignments, submissions, study sessions, calls, purchases, admin tasks.
+- Good examples: "Pay electricity bill", "Data Structures Assignment Session 1", "Reply to important emails", "Buy birthday gift for cousin", "Interview prep", "Electronics Quiz revision"
+- Bad examples: "Arrive at college", "Commute", "Dinner", "Wake up", "being and productivity", "Let's break down those larger tasks"
+- Keep titles short (under 60 chars), specific, and action-oriented.
+- Set priority: high = deadline within 48 hours or exam/interview, normal = this week, low = can wait
+- Maximum 12 tasks, pick the most important ones.
 
 Plan:
 {plan}
@@ -375,7 +417,7 @@ def preserve_completed_tasks(new_tasks, old_tasks):
 def extract_calendar_events(plan):
     today = datetime.now().date().isoformat()
     prompt = f"""
-Extract calendar events from this DeadlineAI plan.
+Extract calendar events from this Nexora plan.
 
 Today is {today}. Convert relative dates like today/tomorrow/Friday into YYYY-MM-DD when possible.
 
@@ -511,7 +553,7 @@ Original plan:
 Completed tasks:
 {json.dumps(completed_titles, indent=2)}
 
-Write a short completion summary in DeadlineAI's warm direct friend tone.
+Write a short completion summary in Nexora's warm direct friend tone.
 Mention what got done and one sane next step. Keep it under 120 words.
 """
     try:
@@ -569,7 +611,7 @@ def guest_login():
     guest_name = f"guest_{uuid.uuid4().hex[:6]}"
     user = User(
         username=guest_name,
-        email=f"{guest_name}@guest.deadlineai",
+        email=f"{guest_name}@guest.Nexora",
         password_hash=generate_password_hash(uuid.uuid4().hex),
         is_guest=True
     )
@@ -578,11 +620,12 @@ def guest_login():
     session["user_id"] = user.id
     session["username"] = user.username
     return redirect(url_for("home"))
+
 @app.route("/logout")
 def logout():
     user_id = session.get("user_id")
     if user_id:
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if user and user.is_guest:
             # Clean up guest data
             Plan.query.filter_by(user_id=user_id).delete()
@@ -619,7 +662,7 @@ def calendar_view():
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>DeadlineAI Calendar</title>
+            <title>Nexora Calendar</title>
             <style>
                 body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f7f3ec; color: #241f1a; }
                 main { width: min(920px, calc(100% - 32px)); margin: 32px auto; }
@@ -650,6 +693,7 @@ def calendar_view():
 
 @app.route("/api/session")
 def current_session():
+
     return jsonify({"logged_in": bool(session.get("user_id")), "user": session.get("username")})
 
 
@@ -672,7 +716,7 @@ def generate_plan():
         if not plan or "trouble reaching" in plan:
             return jsonify({"error": "AI is busy. Try again in 10 seconds."}), 503
 
-        new_plan = Plan(user=session["user_id"], input_text=user_input, plan_text=plan)
+        new_plan = Plan(user_id=session["user_id"], input_text=user_input, plan_text=plan)
         db.session.add(new_plan)
         db.session.commit()
 
@@ -767,7 +811,7 @@ def week_plan():
     prompt = f"""
 Build a realistic 7-day plan for this user.
 Prioritize deadlines, protect sleep, and include calendar-friendly time blocks.
-Keep the same DeadlineAI warm direct friend tone.
+Keep the same Nexora warm direct friend tone.
 
 User situation:
 {user_input}
@@ -890,11 +934,11 @@ def export_ics():
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//DeadlineAI//EN",
+        "PRODID:-//Nexora//EN",
         "CALSCALE:GREGORIAN",
     ]
     for i, ev in enumerate(events):
-        uid = f"deadlineai-{i}-{uuid.uuid4()}"
+        uid = f"Nexora-{i}-{uuid.uuid4()}"
         dt_stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
         date = ev.get("date", "").replace("-", "")
         start = ev.get("start_time", "00:00").replace(":", "")
@@ -913,14 +957,14 @@ def export_ics():
     return Response(
         "\r\n".join(lines),
         mimetype="text/calendar",
-        headers={"Content-Disposition": "attachment; filename=deadlineai.ics"},
+        headers={"Content-Disposition": "attachment; filename=Nexora.ics"},
     )
 
 # ↓ existing /health route stays here
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok", "app": "DeadlineAI"})
+    return jsonify({"status": "ok", "app": "Nexora"})
 @app.route("/api/analytics")
 @login_required
 def analytics():
@@ -966,6 +1010,10 @@ def calendar_page():
 @login_required
 def analytics_page():
     return render_template("analytics_page.html", username=session.get("username", ""), page="analytics")
+@app.route("/debug-users")
+def debug_users():
+    users = User.query.all()
+    return jsonify([{"id": u.id, "username": u.username, "email": u.email} for u in users])
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

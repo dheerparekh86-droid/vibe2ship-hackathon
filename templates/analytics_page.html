@@ -1,149 +1,318 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DeadlineAI - Analytics</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#0B0B0F;color:#fff;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
-    .main{margin-left:220px;flex:1;padding:32px;min-height:100vh}
-    h1{font-size:24px;font-weight:700;margin-bottom:28px}
-    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-    .stat-card{background:#15161A;border:1px solid #1e1e2a;border-radius:12px;padding:20px}
-    .stat-card .icon{font-size:24px;margin-bottom:12px}
-    .stat-card .label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-    .stat-card .value{font-size:28px;font-weight:700;color:#fff}
-    .stat-card .sub{font-size:12px;color:#444;margin-top:4px}
-    .section{background:#15161A;border:1px solid #1e1e2a;border-radius:12px;padding:24px;margin-bottom:20px}
-    .section h2{font-size:15px;font-weight:600;color:#fff;margin-bottom:16px}
-    .progress-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-    .progress-label{font-size:13px;color:#888;min-width:120px}
-    .progress-track{flex:1;background:#1e1e2a;border-radius:4px;height:8px;overflow:hidden}
-    .progress-fill{height:8px;border-radius:4px;transition:width 1s}
-    .progress-value{font-size:13px;color:#fff;font-weight:600;min-width:40px;text-align:right}
-    .recent-list{display:flex;flex-direction:column;gap:8px}
-    .recent-item{background:#0f0f14;border:1px solid #1e1e2a;border-radius:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
-    .recent-item .text{font-size:13px;color:#ccc}
-    .recent-item .time{font-size:11px;color:#444}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .badge{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600}
-    .badge-green{background:#0a1a0a;color:#1D9E75}
-    .bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;margin-top:8px}
-    .bar{flex:1;background:#FF7A1A;border-radius:4px 4px 0 0;min-width:8px;transition:height 0.5s;opacity:0.7}
-    .bar:last-child{opacity:1}
-    .bar-labels{display:flex;gap:6px;margin-top:6px}
-    .bar-label{flex:1;font-size:10px;color:#444;text-align:center}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora - Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+        body {
+            background: #0B0B0F;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh
+        }
+        
+        .main {
+            margin-left: 220px;
+            flex: 1;
+            padding: 32px;
+            min-height: 100vh
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 28px
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px
+        }
+        
+        .stat-card {
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 12px;
+            padding: 20px
+        }
+        
+        .stat-card .icon {
+            font-size: 24px;
+            margin-bottom: 12px
+        }
+        
+        .stat-card .label {
+            font-size: 11px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 6px
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff
+        }
+        
+        .stat-card .sub {
+            font-size: 12px;
+            color: #444;
+            margin-top: 4px
+        }
+        
+        .section {
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px
+        }
+        
+        .section h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 16px
+        }
+        
+        .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px
+        }
+        
+        .progress-label {
+            font-size: 13px;
+            color: #888;
+            min-width: 120px
+        }
+        
+        .progress-track {
+            flex: 1;
+            background: #1e1e2a;
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden
+        }
+        
+        .progress-fill {
+            height: 8px;
+            border-radius: 4px;
+            transition: width 1s
+        }
+        
+        .progress-value {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+            min-width: 40px;
+            text-align: right
+        }
+        
+        .recent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+        
+        .recent-item {
+            background: #0f0f14;
+            border: 1px solid #1e1e2a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+        
+        .recent-item .text {
+            font-size: 13px;
+            color: #ccc
+        }
+        
+        .recent-item .time {
+            font-size: 11px;
+            color: #444
+        }
+        
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600
+        }
+        
+        .badge-green {
+            background: #0a1a0a;
+            color: #1D9E75
+        }
+        
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 100px;
+            margin-top: 8px
+        }
+        
+        .bar {
+            flex: 1;
+            background: #FF7A1A;
+            border-radius: 4px 4px 0 0;
+            min-width: 8px;
+            transition: height 0.5s;
+            opacity: 0.7
+        }
+        
+        .bar:last-child {
+            opacity: 1
+        }
+        
+        .bar-labels {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px
+        }
+        
+        .bar-label {
+            flex: 1;
+            font-size: 10px;
+            color: #444;
+            text-align: center
+        }
+    </style>
 </head>
+
 <body>
-{% include 'sidebar.html' %}
-<main class="main">
-  <h1>📈 Analytics</h1>
+    {% include 'sidebar.html' %}
+    <main class="main">
+        <h1>📈 Analytics</h1>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="icon">📋</div>
-      <div class="label">Total Plans</div>
-      <div class="value" id="a-plans">--</div>
-      <div class="sub">All time</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">✅</div>
-      <div class="label">Tasks Done</div>
-      <div class="value" style="color:#1D9E75" id="a-done">--</div>
-      <div class="sub" id="a-total-sub">of -- total</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">🎯</div>
-      <div class="label">Completion Rate</div>
-      <div class="value" style="color:#FF7A1A" id="a-rate">--%</div>
-      <div class="sub">Task completion</div>
-    </div>
-    <div class="stat-card">
-      <div class="icon">⚡</div>
-      <div class="label">AI Score</div>
-      <div class="value" style="color:#22c9e0" id="a-score">--</div>
-      <div class="sub">Productivity index</div>
-    </div>
-  </div>
-
-  <div class="two-col">
-    <div class="section">
-      <h2>Completion breakdown</h2>
-      <div id="breakdown">
-        <div class="progress-row">
-          <div class="progress-label">Completed</div>
-          <div class="progress-track"><div class="progress-fill" id="fill-done" style="width:0%;background:#1D9E75"></div></div>
-          <div class="progress-value" id="val-done">0%</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">📋</div>
+                <div class="label">Total Plans</div>
+                <div class="value" id="a-plans">--</div>
+                <div class="sub">All time</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">✅</div>
+                <div class="label">Tasks Done</div>
+                <div class="value" style="color:#1D9E75" id="a-done">--</div>
+                <div class="sub" id="a-total-sub">of -- total</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🎯</div>
+                <div class="label">Completion Rate</div>
+                <div class="value" style="color:#FF7A1A" id="a-rate">--%</div>
+                <div class="sub">Task completion</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">⚡</div>
+                <div class="label">AI Score</div>
+                <div class="value" style="color:#22c9e0" id="a-score">--</div>
+                <div class="sub">Productivity index</div>
+            </div>
         </div>
-        <div class="progress-row">
-          <div class="progress-label">Remaining</div>
-          <div class="progress-track"><div class="progress-fill" id="fill-rem" style="width:0%;background:#E24B4A"></div></div>
-          <div class="progress-value" id="val-rem">0%</div>
+
+        <div class="two-col">
+            <div class="section">
+                <h2>Completion breakdown</h2>
+                <div id="breakdown">
+                    <div class="progress-row">
+                        <div class="progress-label">Completed</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="fill-done" style="width:0%;background:#1D9E75"></div>
+                        </div>
+                        <div class="progress-value" id="val-done">0%</div>
+                    </div>
+                    <div class="progress-row">
+                        <div class="progress-label">Remaining</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="fill-rem" style="width:0%;background:#E24B4A"></div>
+                        </div>
+                        <div class="progress-value" id="val-rem">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Activity this session</h2>
+                <div class="bar-chart" id="bar-chart">
+                    <div class="bar" style="height:20%"></div>
+                    <div class="bar" style="height:45%"></div>
+                    <div class="bar" style="height:30%"></div>
+                    <div class="bar" style="height:70%"></div>
+                    <div class="bar" style="height:55%"></div>
+                    <div class="bar" style="height:80%"></div>
+                    <div class="bar" style="height:100%"></div>
+                </div>
+                <div class="bar-labels">
+                    <div class="bar-label">Mon</div>
+                    <div class="bar-label">Tue</div>
+                    <div class="bar-label">Wed</div>
+                    <div class="bar-label">Thu</div>
+                    <div class="bar-label">Fri</div>
+                    <div class="bar-label">Sat</div>
+                    <div class="bar-label">Sun</div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <div class="section">
-      <h2>Activity this session</h2>
-      <div class="bar-chart" id="bar-chart">
-        <div class="bar" style="height:20%"></div>
-        <div class="bar" style="height:45%"></div>
-        <div class="bar" style="height:30%"></div>
-        <div class="bar" style="height:70%"></div>
-        <div class="bar" style="height:55%"></div>
-        <div class="bar" style="height:80%"></div>
-        <div class="bar" style="height:100%"></div>
-      </div>
-      <div class="bar-labels">
-        <div class="bar-label">Mon</div>
-        <div class="bar-label">Tue</div>
-        <div class="bar-label">Wed</div>
-        <div class="bar-label">Thu</div>
-        <div class="bar-label">Fri</div>
-        <div class="bar-label">Sat</div>
-        <div class="bar-label">Sun</div>
-      </div>
-    </div>
-  </div>
+        <div class="section">
+            <h2>Recent plans</h2>
+            <div class="recent-list" id="recent-list">
+                <div style="color:#444;font-size:13px">Loading...</div>
+            </div>
+        </div>
+    </main>
 
-  <div class="section">
-    <h2>Recent plans</h2>
-    <div class="recent-list" id="recent-list">
-      <div style="color:#444;font-size:13px">Loading...</div>
-    </div>
-  </div>
-</main>
+    <script>
+        async function loadAnalytics() {
+            try {
+                const r = await fetch('/api/analytics');
+                const d = await r.json();
 
-<script>
-async function loadAnalytics() {
-  try {
-    const r = await fetch('/api/analytics');
-    const d = await r.json();
+                document.getElementById('a-plans').textContent = d.total_plans || 0;
+                document.getElementById('a-done').textContent = d.completed_tasks || 0;
+                document.getElementById('a-total-sub').textContent = `of ${d.total_tasks || 0} total`;
+                document.getElementById('a-rate').textContent = (d.completion_rate || 0) + '%';
 
-    document.getElementById('a-plans').textContent = d.total_plans || 0;
-    document.getElementById('a-done').textContent = d.completed_tasks || 0;
-    document.getElementById('a-total-sub').textContent = `of ${d.total_tasks || 0} total`;
-    document.getElementById('a-rate').textContent = (d.completion_rate || 0) + '%';
+                const score = Math.min(100, Math.round((d.completion_rate || 0) * 0.6 + (d.total_plans || 0) * 4));
+                document.getElementById('a-score').textContent = score;
 
-    const score = Math.min(100, Math.round((d.completion_rate || 0) * 0.6 + (d.total_plans || 0) * 4));
-    document.getElementById('a-score').textContent = score;
+                const rate = d.completion_rate || 0;
+                document.getElementById('fill-done').style.width = rate + '%';
+                document.getElementById('val-done').textContent = rate + '%';
+                document.getElementById('fill-rem').style.width = (100 - rate) + '%';
+                document.getElementById('val-rem').textContent = (100 - rate) + '%';
 
-    const rate = d.completion_rate || 0;
-    document.getElementById('fill-done').style.width = rate + '%';
-    document.getElementById('val-done').textContent = rate + '%';
-    document.getElementById('fill-rem').style.width = (100 - rate) + '%';
-    document.getElementById('val-rem').textContent = (100 - rate) + '%';
-
-    const recent = d.recent_plans || [];
-    const list = document.getElementById('recent-list');
-    if (!recent.length) {
-      list.innerHTML = '<div style="color:#444;font-size:13px">No plans yet. Build your first plan on the Dashboard.</div>';
-    } else {
-      list.innerHTML = recent.map(p => `
+                const recent = d.recent_plans || [];
+                const list = document.getElementById('recent-list');
+                if (!recent.length) {
+                    list.innerHTML = '<div style="color:#444;font-size:13px">No plans yet. Build your first plan on the Dashboard.</div>';
+                } else {
+                    list.innerHTML = recent.map(p => `
         <div class="recent-item">
           <div class="text">${escHtml(p.input || 'Plan')}</div>
           <div style="display:flex;align-items:center;gap:8px">
@@ -151,17 +320,18 @@ async function loadAnalytics() {
             <span class="badge badge-green">Done</span>
           </div>
         </div>`).join('');
-    }
-  } catch(e) {
-    document.getElementById('recent-list').innerHTML = '<div style="color:#444;font-size:13px">Could not load analytics.</div>';
-  }
-}
+                }
+            } catch (e) {
+                document.getElementById('recent-list').innerHTML = '<div style="color:#444;font-size:13px">Could not load analytics.</div>';
+            }
+        }
 
-function escHtml(t) {
-  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+        function escHtml(t) {
+            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
 
-loadAnalytics();
-</script>
+        loadAnalytics();
+    </script>
 </body>
+
 </html>

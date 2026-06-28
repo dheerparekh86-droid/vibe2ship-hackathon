@@ -1,166 +1,584 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DeadlineAI - AI Assistant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#0B0B0F;color:#fff;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
-    .main{margin-left:220px;flex:1;display:flex;flex-direction:column;height:100vh}
-    .topbar{padding:24px 32px 20px;border-bottom:1px solid #1e1e2a}
-    .topbar h1{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
-    .topbar p{font-size:13px;color:#555}
-    .live-dot{display:inline-block;width:8px;height:8px;background:#1D9E75;border-radius:50%;margin-right:6px;animation:pulse 2s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-    .quick-actions{display:flex;gap:10px;padding:16px 32px;border-bottom:1px solid #1e1e2a;flex-wrap:wrap}
-    .qa-btn{padding:8px 16px;background:#15161A;border:1px solid #1e1e2a;border-radius:8px;color:#888;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s}
-    .qa-btn:hover{border-color:#FF7A1A;color:#FF7A1A}
-    .messages{flex:1;overflow-y:auto;padding:24px 32px;display:flex;flex-direction:column;gap:16px}
-    .msg{max-width:75%;padding:14px 18px;border-radius:14px;font-size:14px;line-height:1.7}
-    .msg-ai{background:#15161A;border:1px solid #1e1e2a;color:#ccc;align-self:flex-start;border-radius:4px 14px 14px 14px}
-    .msg-user{background:#FF7A1A;color:#fff;align-self:flex-end;border-radius:14px 4px 14px 14px}
-    .msg-time{font-size:11px;color:#444;margin-top:6px}
-    .msg-ai .msg-time{color:#333}
-    .ai-avatar{width:28px;height:28px;background:#1a1208;border:1px solid #FF7A1A;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:6px}
-    .input-area{padding:20px 32px;border-top:1px solid #1e1e2a;display:flex;gap:12px;align-items:flex-end}
-    .input-wrap{flex:1;background:#15161A;border:1px solid #1e1e2a;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;transition:border-color 0.15s}
-    .input-wrap:focus-within{border-color:#FF7A1A}
-    .input-wrap textarea{background:transparent;border:none;outline:none;color:#fff;font-size:14px;font-family:'Inter',sans-serif;resize:none;flex:1;max-height:120px;line-height:1.5}
-    .input-wrap textarea::placeholder{color:#444}
-    .send-btn{width:42px;height:42px;background:#FF7A1A;border:none;border-radius:10px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
-    .send-btn:hover{background:#e06a0f}
-    .send-btn:disabled{background:#333;cursor:not-allowed}
-    .typing{display:flex;gap:4px;align-items:center;padding:14px 18px;background:#15161A;border:1px solid #1e1e2a;border-radius:4px 14px 14px 14px;width:fit-content}
-    .typing span{width:6px;height:6px;background:#555;border-radius:50%;animation:bounce 1.2s infinite}
-    .typing span:nth-child(2){animation-delay:.2s}
-    .typing span:nth-child(3){animation-delay:.4s}
-    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-    .welcome{text-align:center;padding:40px 20px;color:#444}
-    .welcome .icon{font-size:48px;margin-bottom:16px}
-    .welcome h2{font-size:18px;color:#666;margin-bottom:8px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexora - AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+        body {
+            background: #0B0B0F;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            min-height: 100vh
+        }
+        
+        .main {
+            margin-left: 220px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh
+        }
+        
+        .topbar {
+            padding: 24px 32px 20px;
+            border-bottom: 1px solid #1e1e2a
+        }
+        
+        .topbar h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px
+        }
+        
+        .topbar p {
+            font-size: 13px;
+            color: #555
+        }
+        
+        .live-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #1D9E75;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite
+        }
+        
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1
+            }
+            50% {
+                opacity: 0.4
+            }
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            padding: 16px 32px;
+            border-bottom: 1px solid #1e1e2a;
+            flex-wrap: wrap
+        }
+        
+        .qa-btn {
+            padding: 8px 16px;
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 8px;
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s
+        }
+        
+        .qa-btn:hover {
+            border-color: #FF7A1A;
+            color: #FF7A1A
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px
+        }
+        
+        .msg {
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.7
+        }
+        
+        .msg-ai {
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            color: #ccc;
+            align-self: flex-start;
+            border-radius: 4px 14px 14px 14px
+        }
+        
+        .msg-user {
+            background: #FF7A1A;
+            color: #fff;
+            align-self: flex-end;
+            border-radius: 14px 4px 14px 14px
+        }
+        
+        .msg-time {
+            font-size: 11px;
+            color: #444;
+            margin-top: 6px
+        }
+        
+        .msg-ai .msg-time {
+            color: #333
+        }
+        
+        .ai-avatar {
+            width: 28px;
+            height: 28px;
+            background: #1a1208;
+            border: 1px solid #FF7A1A;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            margin-bottom: 6px
+        }
+        
+        .input-area {
+            padding: 20px 32px;
+            border-top: 1px solid #1e1e2a;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end
+        }
+        
+        .input-wrap {
+            flex: 1;
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: border-color 0.15s
+        }
+        
+        .input-wrap:focus-within {
+            border-color: #FF7A1A
+        }
+        
+        .input-wrap textarea {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            resize: none;
+            flex: 1;
+            max-height: 120px;
+            line-height: 1.5
+        }
+        
+        .input-wrap textarea::placeholder {
+            color: #444
+        }
+        
+        .send-btn {
+            width: 42px;
+            height: 42px;
+            background: #FF7A1A;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s
+        }
+        
+        .send-btn:hover {
+            background: #e06a0f
+        }
+        
+        .send-btn:disabled {
+            background: #333;
+            cursor: not-allowed
+        }
+        
+        .typing {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 14px 18px;
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 4px 14px 14px 14px;
+            width: fit-content
+        }
+        
+        .typing span {
+            width: 6px;
+            height: 6px;
+            background: #555;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite
+        }
+        
+        .typing span:nth-child(2) {
+            animation-delay: .2s
+        }
+        
+        .typing span:nth-child(3) {
+            animation-delay: .4s
+        }
+        
+        @keyframes bounce {
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+            50% {
+                transform: translateY(-4px)
+            }
+        }
+        
+        .welcome {
+            text-align: center;
+            padding: 40px 20px;
+            color: #444
+        }
+        
+        .welcome .icon {
+            font-size: 48px;
+            margin-bottom: 16px
+        }
+        
+        .welcome h2 {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 8px
+        }
+        
+        .plan-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0;
+            padding: 12px;
+            background: #0f0f14;
+            border-radius: 10px;
+            border: 1px solid #1e1e2a;
+        }
+        
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .metric-label {
+            font-size: 10px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        
+        .metric-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+    </style>
 </head>
+
 <body>
-{% include 'sidebar.html' %}
-<main class="main">
-  <div class="topbar">
-    <h1>🤖 AI Assistant</h1>
-    <p><span class="live-dot"></span>Your personal productivity co-pilot — powered by Gemini</p>
-  </div>
+    {% include 'sidebar.html' %}
+    <main class="main">
+        <div class="topbar">
+            <h1>🤖 AI Assistant</h1>
+            <p><span class="live-dot"></span>Your personal productivity co-pilot — powered by Gemini</p>
+        </div>
 
-  <div class="quick-actions">
-    <button class="qa-btn" onclick="quickAction('Build me a rescue plan for the next 3 hours')">⚡ Rescue Mode</button>
-    <button class="qa-btn" onclick="quickAction('Prioritize my current tasks and tell me what to do first')">🎯 Prioritize Tasks</button>
-    <button class="qa-btn" onclick="quickAction('Build a realistic schedule for my entire week')">📅 Plan My Week</button>
-    <button class="qa-btn" onclick="quickAction('I am feeling overwhelmed, help me find a starting point')">😰 I am Overwhelmed</button>
-  </div>
+        <div class="quick-actions">
+            <button class="qa-btn" onclick="quickAction('Build me a rescue plan for the next 3 hours')">⚡ Rescue Mode</button>
+            <button class="qa-btn" onclick="quickAction('Prioritize my current tasks and tell me what to do first')">🎯 Prioritize Tasks</button>
+            <button class="qa-btn" onclick="quickAction('Build a realistic schedule for my entire week')">📅 Plan My Week</button>
+            <button class="qa-btn" onclick="quickAction('I am feeling overwhelmed, help me find a starting point')">😰 I am Overwhelmed</button>
+            <button class="qa-btn" onclick="openSlipModal()" style="border-color:#E24B4A;color:#E24B4A">⚠ Plan Slipped </button>
+        </div>
 
-  <div class="messages" id="messages">
-    <div class="welcome">
-      <div class="icon">🤖</div>
-      <h2>Hey {{ username }}, what's on your plate?</h2>
-      <p style="font-size:13px;margin-top:8px">Dump your tasks, deadlines, and stress. I'll build you a plan.</p>
-    </div>
-  </div>
+        <div class="messages" id="messages">
+            <div class="welcome">
+                <div class="icon">🤖</div>
+                <h2>Hey {{ username }}, what's on your plate?</h2>
+                <p style="font-size:13px;margin-top:8px">Dump your tasks, deadlines, and stress. I'll build you a plan.</p>
+            </div>
+        </div>
 
-  <div class="input-area">
-    <div class="input-wrap">
-      <textarea id="chat-input" placeholder="Tell me what you're dealing with..." rows="1"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
-        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-    </div>
-    <button class="send-btn" id="send-btn" onclick="sendMessage()">→</button>
-  </div>
-</main>
+        <div class="input-area">
+            <div class="input-wrap">
+                <textarea id="chat-input" placeholder="Tell me what you're dealing with..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            </div>
+            <button class="send-btn" id="send-btn" onclick="sendMessage()">→</button>
+        </div>
+        <div id="slip-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center">
+            <div style="background:#131318;border:1px solid #1e1e2a;border-radius:16px;padding:28px;width:420px;max-width:95vw">
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:8px">⚠ What slipped?</h3>
+                <p style="font-size:13px;color:#555;margin-bottom:16px">Tell me what changed and I'll rebuild your schedule from right now.</p>
+                <textarea id="slip-input" style="width:100%;background:#0f0f14;border:1px solid #1e1e2a;border-radius:10px;padding:12px;color:#fff;font-size:13px;font-family:'Inter',sans-serif;resize:none;height:100px;outline:none" placeholder="e.g. Data Structures took 2 extra hours, now it's 9PM and I still have the quiz to revise..."></textarea>
+                <div style="display:flex;gap:10px;margin-top:16px">
+                    <button onclick="closeSlipModal()" style="flex:1;padding:11px;background:transparent;border:1px solid #1e1e2a;border-radius:8px;color:#888;font-size:13px;cursor:pointer">Cancel</button>
+                    <button onclick="submitSlip()" style="flex:2;padding:11px;background:#FF7A1A;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">Rebuild My Schedule →</button>
+                </div>
+            </div>
+        </div>
+    </main>
 
-<script>
-let isLoading = false;
+    <script>
+        let isLoading = false;
 
-function quickAction(text) {
-  document.getElementById('chat-input').value = text;
-  sendMessage();
-}
+        function quickAction(text) {
+            document.getElementById('chat-input').value = text;
+            sendMessage();
+        }
 
-function addMessage(text, isUser) {
-  const msgs = document.getElementById('messages');
-  const welcome = msgs.querySelector('.welcome');
-  if (welcome) welcome.remove();
+        function addMessage(text, isUser, metrics) {
+            const msgs = document.getElementById('messages');
+            const welcome = msgs.querySelector('.welcome');
+            if (welcome) welcome.remove();
 
-  const div = document.createElement('div');
-  div.className = isUser ? 'msg msg-user' : '';
+            const div = document.createElement('div');
+            div.className = isUser ? 'msg msg-user' : '';
 
-  const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            const time = new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
-  if (isUser) {
-    div.innerHTML = `${escHtml(text)}<div class="msg-time">${time}</div>`;
-  } else {
-    div.innerHTML = `
-      <div class="ai-avatar">⚡</div>
-      <div class="msg msg-ai">${formatPlan(text)}<div class="msg-time">${time}</div></div>`;
-  }
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
+            if (isUser) {
+                div.innerHTML = `${escHtml(text)}<div class="msg-time">${time}</div>`;
+            } else {
+                let metricsHTML = '';
+                if (metrics) {
+                    metricsHTML = `
+            <div class="plan-metrics">
+                <div class="metric-item">
+                    <div class="metric-label">AI Workload Score</div>
+                    <div class="metric-value" style="color:#FF7A1A">${metrics.workload}/10</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Burnout Risk</div>
+                    <div class="metric-value" style="color:${metrics.burnout==='High'?'#E24B4A':metrics.burnout==='Moderate'?'#FF7A1A':'#1D9E75'}">${metrics.burnout}</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Total Work Hours</div>
+                    <div class="metric-value" style="color:#22c9e0">${metrics.totalHours}h</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Free Hours</div>
+                    <div class="metric-value" style="color:#1D9E75">${metrics.freeHours}h</div>
+                </div>
+            </div>`;
+                }
+                div.innerHTML = `
+        <div class="ai-avatar">⚡</div>
+        <div class="msg msg-ai">${metricsHTML}${formatPlan(text)}<div class="msg-time">${time}</div></div>`;
+            }
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
 
-function showTyping() {
-  const msgs = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.id = 'typing-indicator';
-  div.innerHTML = `<div class="ai-avatar">⚡</div><div class="typing"><span></span><span></span><span></span></div>`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
+        function showTyping() {
+            const msgs = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.id = 'typing-indicator';
+            div.innerHTML = `<div class="ai-avatar">⚡</div><div class="typing"><span></span><span></span><span></span></div>`;
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
 
-function removeTyping() {
-  const t = document.getElementById('typing-indicator');
-  if (t) t.remove();
-}
+        function removeTyping() {
+            const t = document.getElementById('typing-indicator');
+            if (t) t.remove();
+        }
 
-function formatPlan(text) {
-  return escHtml(text).replace(/\n/g, '<br>');
-}
+        function formatPlan(text) {
+            let html = escHtml(text);
 
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text || isLoading) return;
+            // Bold **text**
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-  isLoading = true;
-  input.value = '';
-  input.style.height = 'auto';
-  document.getElementById('send-btn').disabled = true;
+            // Section headers like == HEADER ==
+            html = html.replace(/📅 (.*)/g, '<div style="color:#FF7A1A;font-weight:700;font-size:14px;margin:14px 0 6px">📅 $1</div>');
+            html = html.replace(/🧠 (.*)/g, '<div style="color:#22c9e0;font-weight:700;font-size:14px;margin:14px 0 6px">🧠 $1</div>');
+            html = html.replace(/⚠(.*)/g, '<div style="color:#E24B4A;font-size:13px;margin:4px 0">⚠$1</div>');
+            html = html.replace(/✅(.*)/g, '<div style="color:#1D9E75;font-size:13px;margin:4px 0">✅$1</div>');
+            html = html.replace(/💡(.*)/g, '<div style="color:#FF7A1A;font-size:13px;margin:4px 0">💡$1</div>');
+            html = html.replace(/😴(.*)/g, '<div style="color:#6b5fa0;font-size:13px;margin:4px 0">😴$1</div>');
+            html = html.replace(/🔥(.*)/g, '<div style="color:#E24B4A;font-size:13px;margin:4px 0">🔥$1</div>');
+            html = html.replace(/📊(.*)/g, '<div style="color:#22c9e0;font-size:13px;margin:4px 0">📊$1</div>');
+            html = html.replace(/➡(.*)/g, '<div style="color:#FF7A1A;font-size:13px;margin:4px 0">➡$1</div>');
 
-  addMessage(text, true);
-  showTyping();
+            // Time arrows like "7:00 → Task"
+            html = html.replace(/(\d{1,2}:\d{2}.*?)→(.*)/g, '<div style="display:flex;gap:8px;margin:3px 0;font-size:13px"><span style="color:#FF7A1A;min-width:80px;font-weight:600">$1</span><span style="color:#ccc">→$2</span></div>');
 
-  try {
-    const r = await fetch('/api/plan', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({input: text})
-    });
-    const d = await r.json();
-    removeTyping();
-    if (d.error) {
-      addMessage('Something went wrong: ' + d.error, false);
-    } else {
-      addMessage(d.plan, false);
-    }
-  } catch(e) {
-    removeTyping();
-    addMessage('Connection error. Please try again.', false);
-  }
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
 
-  isLoading = false;
-  document.getElementById('send-btn').disabled = false;
-  input.focus();
-}
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || isLoading) return;
 
-function escHtml(t) {
-  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-</script>
+            isLoading = true;
+            input.value = '';
+            input.style.height = 'auto';
+            document.getElementById('send-btn').disabled = true;
+
+            addMessage(text, true);
+            showTyping();
+
+            try {
+                const r = await fetch('/api/plan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        input: text
+                    })
+                });
+                const d = await r.json();
+                removeTyping();
+                if (d.error) {
+                    addMessage('Something went wrong: ' + d.error, false, null);
+                } else {
+                    // Extract metrics from plan text
+                    const plan = d.plan || '';
+                    // Catch "25.5 hours", "Total work estimated: 25.5 hours"
+                    const hoursMatch = plan.match(/(?:total work estimated|estimated[:\s]+)[\s:]*(\d+\.?\d*)\s*hours?/i) ||
+                        plan.match(/(\d+\.?\d*)\s*hours?\s*(?:estimated|total|of work)/i);
+
+                    // Catch "Free hours: 8" or "Available: 8 hours" or "8 free hours"
+                    const freeMatch = plan.match(/(?:free|available)[\s\w]*:?\s*(\d+\.?\d*)\s*hours?/i) ||
+                        plan.match(/(\d+\.?\d*)\s*(?:free|available)\s*hours?/i);
+
+                    // Catch "Burnout Risk: High" or "Burnout: Moderate" or "🔥 Burnout Risk: Low"
+                    const burnoutMatch = plan.match(/[Bb]urnout\s*[Rr]isk[:\s]*(Low|Moderate|High)/i) ||
+                        plan.match(/[Bb]urnout[:\s]*(Low|Moderate|High)/i);
+
+                    // Catch "9.2/10" or "Workload: 9.2/10" or "8/10"
+                    const workloadMatch = plan.match(/(\d+\.?\d*)\/10/) ||
+                        plan.match(/[Ww]orkload\s*[Ss]core[:\s]*(\d+\.?\d*)/i);
+
+                    // Calculate free hours if not found explicitly
+                    const totalHoursNum = hoursMatch ? parseFloat(hoursMatch[1]) : null;
+                    const freeHoursCalc = totalHoursNum ? Math.max(0, (7 * 16) - totalHoursNum).toFixed(1) : '?';
+
+                    const metrics = {
+                        workload: workloadMatch ? workloadMatch[1] : '?',
+                        burnout: burnoutMatch ? burnoutMatch[1] : '?',
+                        totalHours: hoursMatch ? hoursMatch[1] : '?',
+                        freeHours: freeMatch ? freeMatch[1] : freeHoursCalc
+                    };
+
+                    // Only show metrics card if we got at least one value
+                    const hasMetrics = workloadMatch || burnoutMatch || hoursMatch;
+                    window.__lastPlan = plan;
+                    addMessage(plan, false, hasMetrics ? metrics : null);
+                }
+            } catch (e) {
+                removeTyping();
+                addMessage('Connection error. Please try again.', false, null);
+            }
+
+            isLoading = false;
+            document.getElementById('send-btn').disabled = false;
+            input.focus();
+        }
+
+        function escHtml(t) {
+            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function openSlipModal() {
+            document.getElementById('slip-modal').style.display = 'flex';
+            document.getElementById('slip-input').focus();
+        }
+
+        function closeSlipModal() {
+            document.getElementById('slip-modal').style.display = 'none';
+        }
+
+        async function submitSlip() {
+            const slipText = document.getElementById('slip-input').value.trim();
+            if (!slipText) return;
+
+            closeSlipModal();
+
+            const now = new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const currentPlan = window.__lastPlan || '';
+
+            const reschedulePrompt = `
+It is currently ${now}.
+
+Original plan:
+${currentPlan}
+
+What slipped:
+${slipText}
+
+The user's schedule has gone off track. Rebuild the rest of today's schedule from RIGHT NOW (${now}).
+- Only plan from ${now} onwards — don't re-plan what's already done
+- Identify what still must happen today vs what can move to tomorrow
+- Be honest if something has to be dropped
+- Give specific new times for everything remaining
+- End with updated contingency rules
+`;
+
+            const input = document.getElementById('chat-input');
+            input.value = '';
+
+            addMessage(`⚠ Plan slipped: ${slipText}`, true, null);
+            showTyping();
+
+            try {
+                const r = await fetch('/api/reschedule', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        original_plan: currentPlan,
+                        update: slipText
+                    })
+                });
+                const d = await r.json();
+                removeTyping();
+                if (d.error) {
+                    addMessage('Could not reschedule: ' + d.error, false, null);
+                } else {
+                    window.__lastPlan = d.plan;
+                    addMessage(d.plan, false, null);
+                    addMessage('📋 Tasks and calendar updated with your new schedule.', false, null);
+                }
+            } catch (e) {
+                removeTyping();
+                addMessage('Connection error. Try again.', false, null);
+            }
+        }
+    </script>
 </body>
+
 </html>
