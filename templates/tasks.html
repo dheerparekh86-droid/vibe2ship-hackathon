@@ -14,11 +14,20 @@
         }
         
         body {
-            background: #0B0B0F;
+            background-color: #0B0B0F;
             color: #fff;
             font-family: 'Inter', sans-serif;
             display: flex;
-            min-height: 100vh
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(180deg, rgba(11, 11, 15, .5), rgba(11, 11, 15, .72)), url('/static/tasks-bg.jpg') center center / cover no-repeat;
         }
         
         .main {
