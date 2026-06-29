@@ -170,7 +170,12 @@
             padding: 24px 32px;
             display: flex;
             flex-direction: column;
-            gap: 16px
+            gap: 16px;
+            background-image: url('/static/assistant_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: local;
+            position: relative;
         }
         
         .msg {
@@ -337,6 +342,20 @@
             font-size: 18px;
             color: #666;
             margin-bottom: 8px
+        }
+        
+        .messages::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .messages>* {
+            position: relative;
+            z-index: 1;
         }
         
         .plan-metrics {
