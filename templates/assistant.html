@@ -7,6 +7,79 @@
     <title>Nexora - AI Assistant</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        .mic-btn {
+            width: 42px;
+            height: 42px;
+            background: #15161A;
+            border: 1px solid #1e1e2a;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        
+        .mic-btn:hover {
+            border-color: #FF7A1A;
+        }
+        
+        .mic-btn.listening {
+            background: #2a0a0a;
+            border-color: #E24B4A;
+            animation: mic-pulse 1s infinite;
+        }
+        
+        @keyframes mic-pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(226, 75, 74, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(226, 75, 74, 0);
+            }
+        }
+        
+        .read-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+            padding: 5px 12px;
+            background: #0f1a1a;
+            border: 1px solid #1a2e2e;
+            border-radius: 6px;
+            color: #22c9e0;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .read-btn:hover {
+            background: #1a2e2e;
+        }
+        
+        .read-btn.speaking {
+            background: #1a0808;
+            border-color: #E24B4A;
+            color: #E24B4A;
+        }
+        
+        .mic-status {
+            font-size: 12px;
+            color: #E24B4A;
+            text-align: center;
+            padding: 4px;
+            display: none;
+        }
+        
+        .mic-status.show {
+            display: block;
+        }
+        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -323,8 +396,9 @@
         </div>
 
         <div class="input-area">
+            <button class="mic-btn" id="mic-btn" onclick="toggleSpeech()" title="Speak your situation">🎤</button>
             <div class="input-wrap">
-                <textarea id="chat-input" placeholder="Tell me what you're dealing with..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                <textarea id="chat-input" placeholder="Tell me what you're dealing with... or click 🎤 to speak" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
             </div>
             <button class="send-btn" id="send-btn" onclick="sendMessage()">→</button>
         </div>
@@ -347,6 +421,41 @@
         function quickAction(text) {
             document.getElementById('chat-input').value = text;
             sendMessage();
+        }
+
+        function showTyping() {
+            const msgs = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.id = 'typing-indicator';
+            div.innerHTML = `<div class="ai-avatar">⚡</div><div class="typing"><span></span><span></span><span></span></div>`;
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function removeTyping() {
+            const t = document.getElementById('typing-indicator');
+            if (t) t.remove();
+        }
+
+        function escHtml(t) {
+            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function formatPlan(text) {
+            let html = escHtml(text);
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/📅 (.*)/g, '<div style="color:#FF7A1A;font-weight:700;font-size:14px;margin:14px 0 6px">📅 $1</div>');
+            html = html.replace(/🧠 (.*)/g, '<div style="color:#22c9e0;font-weight:700;font-size:14px;margin:14px 0 6px">🧠 $1</div>');
+            html = html.replace(/⚠(.*)/g, '<div style="color:#E24B4A;font-size:13px;margin:4px 0">⚠$1</div>');
+            html = html.replace(/✅(.*)/g, '<div style="color:#1D9E75;font-size:13px;margin:4px 0">✅$1</div>');
+            html = html.replace(/💡(.*)/g, '<div style="color:#FF7A1A;font-size:13px;margin:4px 0">💡$1</div>');
+            html = html.replace(/😴(.*)/g, '<div style="color:#6b5fa0;font-size:13px;margin:4px 0">😴$1</div>');
+            html = html.replace(/🔥(.*)/g, '<div style="color:#E24B4A;font-size:13px;margin:4px 0">🔥$1</div>');
+            html = html.replace(/📊(.*)/g, '<div style="color:#22c9e0;font-size:13px;margin:4px 0">📊$1</div>');
+            html = html.replace(/➡(.*)/g, '<div style="color:#FF7A1A;font-size:13px;margin:4px 0">➡$1</div>');
+            html = html.replace(/(\d{1,2}:\d{2}.*?)→(.*)/g, '<div style="display:flex;gap:8px;margin:3px 0;font-size:13px"><span style="color:#FF7A1A;min-width:80px;font-weight:600">$1</span><span style="color:#ccc">→$2</span></div>');
+            html = html.replace(/\n/g, '<br>');
+            return html;
         }
 
         function addMessage(text, isUser, metrics) {
@@ -387,50 +496,20 @@
                 </div>
             </div>`;
                 }
+                const msgId = 'msg-' + Date.now();
                 div.innerHTML = `
         <div class="ai-avatar">⚡</div>
-        <div class="msg msg-ai">${metricsHTML}${formatPlan(text)}<div class="msg-time">${time}</div></div>`;
+        <div class="msg msg-ai" id="${msgId}">
+            ${metricsHTML}${formatPlan(text)}
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid #1e1e2a">
+                <button class="read-btn" id="read-btn-${msgId}" onclick="readAloud('${msgId}')">🔊 Read Aloud</button>
+                <button class="read-btn" onclick="stopSpeaking()" style="border-color:#333;color:#555">⏹ Stop</button>
+                <div class="msg-time" style="margin:0;margin-left:auto">${time}</div>
+            </div>
+        </div>`;
             }
             msgs.appendChild(div);
             msgs.scrollTop = msgs.scrollHeight;
-        }
-
-        function showTyping() {
-            const msgs = document.getElementById('messages');
-            const div = document.createElement('div');
-            div.id = 'typing-indicator';
-            div.innerHTML = `<div class="ai-avatar">⚡</div><div class="typing"><span></span><span></span><span></span></div>`;
-            msgs.appendChild(div);
-            msgs.scrollTop = msgs.scrollHeight;
-        }
-
-        function removeTyping() {
-            const t = document.getElementById('typing-indicator');
-            if (t) t.remove();
-        }
-
-        function formatPlan(text) {
-            let html = escHtml(text);
-
-            // Bold **text**
-            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-            // Section headers like == HEADER ==
-            html = html.replace(/📅 (.*)/g, '<div style="color:#FF7A1A;font-weight:700;font-size:14px;margin:14px 0 6px">📅 $1</div>');
-            html = html.replace(/🧠 (.*)/g, '<div style="color:#22c9e0;font-weight:700;font-size:14px;margin:14px 0 6px">🧠 $1</div>');
-            html = html.replace(/⚠(.*)/g, '<div style="color:#E24B4A;font-size:13px;margin:4px 0">⚠$1</div>');
-            html = html.replace(/✅(.*)/g, '<div style="color:#1D9E75;font-size:13px;margin:4px 0">✅$1</div>');
-            html = html.replace(/💡(.*)/g, '<div style="color:#FF7A1A;font-size:13px;margin:4px 0">💡$1</div>');
-            html = html.replace(/😴(.*)/g, '<div style="color:#6b5fa0;font-size:13px;margin:4px 0">😴$1</div>');
-            html = html.replace(/🔥(.*)/g, '<div style="color:#E24B4A;font-size:13px;margin:4px 0">🔥$1</div>');
-            html = html.replace(/📊(.*)/g, '<div style="color:#22c9e0;font-size:13px;margin:4px 0">📊$1</div>');
-            html = html.replace(/➡(.*)/g, '<div style="color:#FF7A1A;font-size:13px;margin:4px 0">➡$1</div>');
-
-            // Time arrows like "7:00 → Task"
-            html = html.replace(/(\d{1,2}:\d{2}.*?)→(.*)/g, '<div style="display:flex;gap:8px;margin:3px 0;font-size:13px"><span style="color:#FF7A1A;min-width:80px;font-weight:600">$1</span><span style="color:#ccc">→$2</span></div>');
-
-            html = html.replace(/\n/g, '<br>');
-            return html;
         }
 
         async function sendMessage() {
@@ -461,36 +540,23 @@
                 if (d.error) {
                     addMessage('Something went wrong: ' + d.error, false, null);
                 } else {
-                    // Extract metrics from plan text
                     const plan = d.plan || '';
-                    // Catch "25.5 hours", "Total work estimated: 25.5 hours"
                     const hoursMatch = plan.match(/(?:total work estimated|estimated[:\s]+)[\s:]*(\d+\.?\d*)\s*hours?/i) ||
                         plan.match(/(\d+\.?\d*)\s*hours?\s*(?:estimated|total|of work)/i);
-
-                    // Catch "Free hours: 8" or "Available: 8 hours" or "8 free hours"
                     const freeMatch = plan.match(/(?:free|available)[\s\w]*:?\s*(\d+\.?\d*)\s*hours?/i) ||
                         plan.match(/(\d+\.?\d*)\s*(?:free|available)\s*hours?/i);
-
-                    // Catch "Burnout Risk: High" or "Burnout: Moderate" or "🔥 Burnout Risk: Low"
                     const burnoutMatch = plan.match(/[Bb]urnout\s*[Rr]isk[:\s]*(Low|Moderate|High)/i) ||
                         plan.match(/[Bb]urnout[:\s]*(Low|Moderate|High)/i);
-
-                    // Catch "9.2/10" or "Workload: 9.2/10" or "8/10"
                     const workloadMatch = plan.match(/(\d+\.?\d*)\/10/) ||
                         plan.match(/[Ww]orkload\s*[Ss]core[:\s]*(\d+\.?\d*)/i);
-
-                    // Calculate free hours if not found explicitly
                     const totalHoursNum = hoursMatch ? parseFloat(hoursMatch[1]) : null;
                     const freeHoursCalc = totalHoursNum ? Math.max(0, (7 * 16) - totalHoursNum).toFixed(1) : '?';
-
                     const metrics = {
                         workload: workloadMatch ? workloadMatch[1] : '?',
                         burnout: burnoutMatch ? burnoutMatch[1] : '?',
                         totalHours: hoursMatch ? hoursMatch[1] : '?',
                         freeHours: freeMatch ? freeMatch[1] : freeHoursCalc
                     };
-
-                    // Only show metrics card if we got at least one value
                     const hasMetrics = workloadMatch || burnoutMatch || hoursMatch;
                     window.__lastPlan = plan;
                     addMessage(plan, false, hasMetrics ? metrics : null);
@@ -505,10 +571,6 @@
             input.focus();
         }
 
-        function escHtml(t) {
-            return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
-
         function openSlipModal() {
             document.getElementById('slip-modal').style.display = 'flex';
             document.getElementById('slip-input').focus();
@@ -521,38 +583,14 @@
         async function submitSlip() {
             const slipText = document.getElementById('slip-input').value.trim();
             if (!slipText) return;
-
             closeSlipModal();
-
             const now = new Date().toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit'
             });
             const currentPlan = window.__lastPlan || '';
-
-            const reschedulePrompt = `
-It is currently ${now}.
-
-Original plan:
-${currentPlan}
-
-What slipped:
-${slipText}
-
-The user's schedule has gone off track. Rebuild the rest of today's schedule from RIGHT NOW (${now}).
-- Only plan from ${now} onwards — don't re-plan what's already done
-- Identify what still must happen today vs what can move to tomorrow
-- Be honest if something has to be dropped
-- Give specific new times for everything remaining
-- End with updated contingency rules
-`;
-
-            const input = document.getElementById('chat-input');
-            input.value = '';
-
             addMessage(`⚠ Plan slipped: ${slipText}`, true, null);
             showTyping();
-
             try {
                 const r = await fetch('/api/reschedule', {
                     method: 'POST',
@@ -578,6 +616,140 @@ The user's schedule has gone off track. Rebuild the rest of today's schedule fro
                 addMessage('Connection error. Try again.', false, null);
             }
         }
+
+        // ── SPEECH RECOGNITION ──
+        let recognition = null;
+        let isListening = false;
+
+        function toggleSpeech() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Speech recognition not supported. Try Chrome.');
+                return;
+            }
+            isListening ? stopListening() : startListening();
+        }
+
+        function startListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            const micBtn = document.getElementById('mic-btn');
+            const input = document.getElementById('chat-input');
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('listening');
+                micBtn.textContent = '🔴';
+                showMicStatus('Listening... speak your situation');
+            };
+            recognition.onresult = (event) => {
+                let final = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) final += event.results[i][0].transcript;
+                }
+                if (final) {
+                    input.value += final;
+                    input.style.height = 'auto';
+                    input.style.height = input.scrollHeight + 'px';
+                }
+            };
+            recognition.onerror = (e) => {
+                stopListening();
+                if (e.error !== 'no-speech') showMicStatus('Error: ' + e.error, true);
+            };
+            recognition.onend = () => stopListening();
+            recognition.start();
+        }
+
+        function stopListening() {
+            isListening = false;
+            const micBtn = document.getElementById('mic-btn');
+            micBtn.classList.remove('listening');
+            micBtn.textContent = '🎤';
+            hideMicStatus();
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+        }
+
+        function showMicStatus(msg, isError) {
+            let el = document.getElementById('mic-status');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'mic-status';
+                el.className = 'mic-status';
+                document.querySelector('.input-area').before(el);
+            }
+            el.textContent = msg;
+            el.style.color = isError ? '#E24B4A' : '#22c9e0';
+            el.classList.add('show');
+        }
+
+        function hideMicStatus() {
+            const el = document.getElementById('mic-status');
+            if (el) el.classList.remove('show');
+        }
+
+        // ── TEXT TO SPEECH ──
+        let currentUtterance = null;
+        let isSpeaking = false;
+
+        function readAloud(msgId) {
+            const msgEl = document.getElementById(msgId);
+            if (!msgEl) return;
+            const rawText = msgEl.innerText || msgEl.textContent;
+            const cleanText = rawText.replace('🔊 Read Aloud', '').replace('⏹ Stop', '').replace(/\s+/g, ' ').trim();
+            if (!cleanText) return;
+            stopSpeaking();
+            const btn = document.getElementById('read-btn-' + msgId);
+            currentUtterance = new SpeechSynthesisUtterance(cleanText);
+            currentUtterance.rate = 0.95;
+            currentUtterance.pitch = 1.0;
+            currentUtterance.volume = 1.0;
+            const voices = window.speechSynthesis.getVoices();
+            const preferred = voices.find(v => v.name.includes('Google') || v.lang === 'en-US');
+            if (preferred) currentUtterance.voice = preferred;
+            currentUtterance.onstart = () => {
+                isSpeaking = true;
+                if (btn) {
+                    btn.textContent = '🔊 Speaking...';
+                    btn.classList.add('speaking');
+                }
+            };
+            currentUtterance.onend = () => {
+                isSpeaking = false;
+                if (btn) {
+                    btn.textContent = '🔊 Read Aloud';
+                    btn.classList.remove('speaking');
+                }
+                currentUtterance = null;
+            };
+            currentUtterance.onerror = () => {
+                isSpeaking = false;
+                if (btn) {
+                    btn.textContent = '🔊 Read Aloud';
+                    btn.classList.remove('speaking');
+                }
+                currentUtterance = null;
+            };
+            window.speechSynthesis.speak(currentUtterance);
+        }
+
+        function stopSpeaking() {
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            isSpeaking = false;
+            currentUtterance = null;
+            document.querySelectorAll('.read-btn').forEach(btn => {
+                if (btn.textContent.includes('Speaking')) {
+                    btn.textContent = '🔊 Read Aloud';
+                    btn.classList.remove('speaking');
+                }
+            });
+        }
+
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     </script>
 </body>
 

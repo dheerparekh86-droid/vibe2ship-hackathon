@@ -570,14 +570,14 @@ def login():
         return redirect(url_for("home"))
     error = None
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
+        username = request.form.get("username", "").strip().lower()
         password = request.form.get("password", "")
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(username=username).first()
         if user and not user.is_guest and check_password_hash(user.password_hash, password):
             session["user_id"] = user.id
             session["username"] = user.username
             return redirect(url_for("home"))
-        error = "Wrong email or password."
+        error = "Wrong username or password."
     return render_template("login.html", error=error)
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -598,7 +598,7 @@ def register():
             error = "That username is taken."
         else:
             user = User(
-                username=username,
+                username=username.lower(),
                 email=email,
                 password_hash=generate_password_hash(password)
             )
