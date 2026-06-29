@@ -14,11 +14,20 @@
         }
         
         body {
-            background: #0B0B0F;
+            background-color: #0B0B0F;
             color: #fff;
             font-family: 'Inter', sans-serif;
             display: flex;
-            min-height: 100vh
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(180deg, rgba(11, 11, 15, .45), rgba(11, 11, 15, .68)), url('/static/calendar-bg.jpg') center center / cover no-repeat;
         }
         
         .main {
@@ -61,9 +70,11 @@
         }
         
         .btn-ghost {
-            background: #15161A;
-            color: #888;
-            border: 1px solid #1e1e2a
+            background: rgba(21, 22, 26, .55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #aaa;
+            border: 1px solid rgba(255, 255, 255, .12)
         }
         
         .btn-ghost:hover {
@@ -80,8 +91,10 @@
         
         .day-pill {
             padding: 12px 8px;
-            background: #15161A;
-            border: 1px solid #1e1e2a;
+            background: rgba(21, 22, 26, .55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, .08);
             border-radius: 10px;
             text-align: center;
             cursor: pointer;
@@ -89,13 +102,15 @@
         }
         
         .day-pill.today {
-            background: #1a0f00;
-            border-color: #FF7A1A
+            background: rgba(26, 15, 0, .65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 122, 26, .25);
         }
         
         .day-pill .day-name {
             font-size: 11px;
-            color: #555;
+            color: #8a8a95;
             text-transform: uppercase;
             letter-spacing: .05em;
             margin-bottom: 4px
@@ -126,8 +141,10 @@
         }
         
         .event-card {
-            background: #15161A;
-            border: 1px solid #1e1e2a;
+            background: rgba(21, 22, 26, .55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, .08);
             border-radius: 12px;
             padding: 16px 20px;
             display: flex;
@@ -137,7 +154,7 @@
         }
         
         .event-card:hover {
-            border-color: #2a2a3a
+            border-color: rgba(255, 255, 255, .16)
         }
         
         .event-time {
@@ -163,7 +180,7 @@
         
         .event-info .event-desc {
             font-size: 12px;
-            color: #555
+            color: #8a8a95
         }
         
         .event-tag {
@@ -178,7 +195,7 @@
         .empty-state {
             text-align: center;
             padding: 60px;
-            color: #444
+            color: #888
         }
         
         .empty-state .icon {
@@ -244,7 +261,7 @@
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
             // Build nav starting from 3 days before today
-            for (let i = -1; i <= 6; i++) {
+            for (let i = 0; i <= 13; i++) {
                 const d = new Date(today);
                 d.setDate(today.getDate() + i);
                 const isToday = i === 0;
